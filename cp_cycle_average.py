@@ -13,6 +13,7 @@ TODO:
 @author: Jussi (jnu@iki.fi)
 """
 
+from __future__ import print_function
 import gaitutils
 from gaitutils import cfg
 import matplotlib.pyplot as plt
@@ -23,9 +24,10 @@ import os
 import os.path as op
 
 # parameters
-side = 'L'
+side = 'R'
 rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
-subject = 'TD26'
+plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
+subject = 'TD25'
 max_files = None # limit c3d files read (for debug)
 max_dist = 15  # deg, for outlier detection
 
@@ -41,6 +43,7 @@ for i, row in enumerate(lout):
 # flatten into list
 lout_ = [item for row in lout for item in row]
 
+
 # try to auto find data dirs under subject dir
 subjdir = op.join(rootdir, subject)
 datadirs = [file for file in os.listdir(subjdir) if
@@ -49,15 +52,18 @@ if len(datadirs) > 1:
     raise Exception('Multiple data dirs under subject')
 datadir = datadirs[0]
 
+
 # collect normal walk trials
 N_files = op.join(subjdir, datadir, '*_N*c3d')
 Nfiles = glob.glob(N_files)
 Nfiles = Nfiles[:max_files] if max_files is not None else Nfiles
 
+
 # collect cognitive trials
 C_files = op.join(subjdir, datadir, '*_C*c3d')
 Cfiles = glob.glob(C_files)
 Cfiles = Cfiles[:max_files] if max_files is not None else Cfiles
+
 
 # average over trials                                    
 models = gaitutils.models.models_all[:2]  # PiG lower and upper
@@ -95,12 +101,28 @@ l_cogn = mlines.Line2D([], [], color='red')
 plt.legend([l_norm, l_cogn], ['normal', 'cognitive'], bbox_to_anchor=(.98, .98),
            bbox_transform=plt.gcf().transFigure, fontsize=8)
 
+# create pdf and png figs
+figname = '%s_%s' % (subject, side)
+figname = op.join(plotdir, figname)
+plt.savefig(figname+'.pdf')
+plt.savefig(figname+'.png')
+logname = figname+'.log'
+
 # report N of cycles per var
-print('\n')
+print('\n%s: %s' % (subject, side))
 print('N of normal cycles per variable:')
 print({key: var for key, var in N_ok.items() if key in lout_})
 print('N of cogn. cycles per variable:')
 print({key: var for key, var in C_ok.items() if key in lout_})
+
+# ...also into logfile
+with open(logname, 'w') as f:
+    print('\n%s: %s' % (subject, side), file=f)
+    print('N of normal cycles per variable:', file=f)
+    print({key: var for key, var in N_ok.items() if key in lout_}, file=f)
+    print('N of cogn. cycles per variable:', file=f)
+    print({key: var for key, var in C_ok.items() if key in lout_}, file=f)
+
 
 
 
