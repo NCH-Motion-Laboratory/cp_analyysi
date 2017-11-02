@@ -43,15 +43,13 @@ import sys
 import os
 import os.path as op
 
-    
-def _get_stats(subjects):
+
+def _get_data(subjects):
 
     # parameters
     rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
     plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
 
-    stats_vars = ['HipAnglesX', 'PelvisAnglesX', 'AnkleAnglesX',
-                  'ThoraxAnglesY', 'ThoraxAnglesZ']
     
     Cfiles = list()
     Nfiles = list()
@@ -81,22 +79,44 @@ def _get_stats(subjects):
     C_data, C_nc = gaitutils.stats._collect_model_data(Cfiles)
     N_data, N_nc = gaitutils.stats._collect_model_data(Nfiles)
     
+    return N_data, N_nc, C_data, C_nc
+
+    
+def _get_stats(N_data, C_data):
+    
     results = dict()
     results['C'] = dict()
     results['N'] = dict()
 
+    stats_vars = ['HipAnglesX', 'PelvisAnglesX', 'AnkleAnglesX',
+                  'ThoraxAnglesY', 'ThoraxAnglesZ']
+
     for cond in results.keys():
-        for varname in stats_vars:
-            print('collect %s' % varname)
-            sys.stdout.flush()
-            results[cond][side+varname] = dict()
-            # data at first frame (foot strike)
-            results[cond][side+varname]['foot_strike'] = C_data[varname][:, 0]
-        
+        for varname_ in stats_vars:
+            for side in ['R', 'L']:
+                varname = side + varname_
+                results[cond][side+varname] = dict()
+                data = C_data if cond == 'C' else N_data
+                # data at first frame (foot strike)
+                results[cond][varname]['foot_strike'] = data[varname][:, 0]
+                # maximum for each curve
+                results[cond][varname]['max'] = data[varname].max(axis=1)
+                # minimum for each curve
+                results[cond][varname]['min'] = data[varname].min(axis=1)
+                # local extrema for each curve
+                #xtr = scipy.signal.argrelextrema(y, np.greater)
+                #results[cond][varname]['max'] = data[varname].min(axis=1)
+                
     return results
 
 
-subjects = ['TD26', 'TD25', 'TD24', 'TD23', 'TD17', 'TD04'][:2]
-res = _get_stats(subjects)
+subjects = ['TD26', 'TD25', 'TD24', 'TD23', 'TD17', 'TD04']
+
+N_data, N_nc, C_data, C_nc = _get_data(subjects)
+
+res = _get_stats(N_data, C_data)
+
+y = res['C']['LHipAnglesX']['foot_strike']
+
 
 

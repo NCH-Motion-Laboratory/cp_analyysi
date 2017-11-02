@@ -65,13 +65,8 @@ def _do_average(subjects, side):
     print('total of %d/%d trials' % (len(Nfiles), len(Cfiles)))
     
     # average over trials                                    
-    models = gaitutils.models.models_all[:2]  # PiG lower and upper
-    Cavgdata, Cstddata, C_ok, Ccyc = gaitutils.stats.average_trials(Cfiles, models,
-                                                              max_dist=max_dist)
-    Navgdata, Nstddata, N_ok, Ncyc = gaitutils.stats.average_trials(Nfiles, models,
-                                                              max_dist=max_dist)
-    Ntr = gaitutils.trial.AvgTrial(Navgdata)
-    Ctr = gaitutils.trial.AvgTrial(Cavgdata)
+    Ntr = gaitutils.stats.AvgTrial(Nfiles)
+    Ctr = gaitutils.stats.AvgTrial(Cfiles)
     
     # plot all
     pl = gaitutils.Plotter()
@@ -81,17 +76,20 @@ def _do_average(subjects, side):
     cfg['plot']['model_stddev_colors'] = "{'R': 'blue', 'L': 'blue'}"
     cfg['plot']['model_tracecolors'] = "{'R': 'blue', 'L': 'blue'}"
     
-    pl.plot_trial(plot_model_normaldata=False, model_stddev=Nstddata)
+    pl.plot_trial(plot_model_normaldata=False, model_stddev=Ntr.stddev_data)
        
     cfg['plot']['model_stddev_colors'] = "{'R': 'red', 'L': 'red'}"
     cfg['plot']['model_tracecolors'] = "{'R': 'red', 'L': 'red'}"
     pl.trial = Ctr
     
+    """
     maintitle = '%s normal vs cognitive (%s)\n' % (subjects, side)
-    maintitle += 'N_cycles normal: %d, cognitive: %d' % (Ncyc[side], Ccyc[side])
-                             
-    pl.plot_trial(plot_model_normaldata=False, model_stddev=Cstddata,
-                  show=True, superpose=True, maintitle=maintitle)
+    maintitle += 'N_cycles normal: %d, cognitive: %d' % (Ncyc[side],
+                                                         Ccyc[side])
+    """
+                         
+    pl.plot_trial(plot_model_normaldata=False, model_stddev=Ctr.stddev_data,
+                  show=True, superpose=True, maintitle='test')
     
     # create custom legend outside axes
     from matplotlib.patches import mlines
@@ -110,21 +108,21 @@ def _do_average(subjects, side):
     # report N of cycles per var
     print('\n%s: %s' % (subjects, side))
     print('N of normal cycles per variable:')
-    print({key: var for key, var in N_ok.items() if key in lout_})
+#    print({key: var for key, var in N_ok.items() if key in lout_})
     print('N of cogn. cycles per variable:')
-    print({key: var for key, var in C_ok.items() if key in lout_})
+#    print({key: var for key, var in C_ok.items() if key in lout_})
     
     # ...also into logfile
     with open(logname, 'w') as f:
         print('\n%s: %s' % (subjects, side), file=f)
         print('N of normal cycles per variable:', file=f)
-        print({key: var for key, var in N_ok.items() if key in lout_}, file=f)
+#        print({key: var for key, var in N_ok.items() if key in lout_}, file=f)
         print('N of cogn. cycles per variable:', file=f)
-        print({key: var for key, var in C_ok.items() if key in lout_}, file=f)
+#        print({key: var for key, var in C_ok.items() if key in lout_}, file=f)
 
 
 side = 'R'
-subjects = ['TD26', 'TD25', 'TD24', 'TD23', 'TD17', 'TD04']
+subjects = ['TD26', 'TD25', 'TD24', 'TD23', 'TD17', 'TD04'][:2]
 _do_average(subjects, side)
 
 
