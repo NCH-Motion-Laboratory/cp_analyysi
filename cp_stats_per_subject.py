@@ -74,7 +74,7 @@ def _get_data(subject):
         raise Exception('No trials for subject %s' % subject)
 
     print('%s: total of %d/%d trials' % (subject, len(Nfiles), len(Cfiles)))
-    
+
     C_avgdata, C_stddata, _, _ = gaitutils.stats.average_trials(Cfiles)
     N_avgdata, N_stddata, _, _ = gaitutils.stats.average_trials(Nfiles)
 
@@ -107,9 +107,10 @@ def _get_vars(N_avgdata, C_avgdata):
                 xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
                 results[cond][varname]['localextind'] = xind
                 results[cond][varname]['localext'] = data[varname][xind]
+                # local extrema during contact
                 xind_contact = xind[np.where(xind < 60)]
                 results[cond][varname]['contact_max'] = data[varname][xind_contact]
-                
+
     return results
 
 
@@ -120,7 +121,26 @@ N_avgdata, N_stddata, C_avgdata, C_stddata = _get_data(subject)
 
 res = _get_vars(N_avgdata, C_avgdata)
 
-y = res['C']['LHipAnglesX']['foot_strike']
 
-
+print('Subject %s' % subject)
+for cond in ['N', 'C']:
+    print('Condition: %s' % ('normal' if cond == 'N' else 'cognitive'))
+    for side in ['R', 'L']:
+        print('Side: %s' % ('right' if side == 'R' else 'left'))
+        print('Hip flexion at foot strike: %.3f' %
+              res[cond][side+'HipAnglesX']['at_foot_strike'])
+        print('Knee flexion at foot strike: %.3f' %
+              res[cond][side+'KneeAnglesX']['at_foot_strike'])
+        print('Ankle dorsi/plant at foot strike: %.3f' %
+              res[cond][side+'AnkleAnglesX']['at_foot_strike'])
+        print('Ankle dorsi/plant max. during contact phase: %.3f' %
+              res[cond][side+'AnkleAnglesX']['contact_max'])
+        print('Thorax lateral flex max. : %.3f' %
+              res[cond][side+'ThoraxAnglesY']['max'])
+        print('Thorax lateral flex min. : %.3f' %
+              res[cond][side+'ThoraxAnglesY']['min'])
+        print('Thorax rotation max. : %.3f' %
+              res[cond][side+'ThoraxAnglesZ']['max'])
+        print('Thorax rotation min. : %.3f' %
+              res[cond][side+'ThoraxAnglesZ']['min'])
 
