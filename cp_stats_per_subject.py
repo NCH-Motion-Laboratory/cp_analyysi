@@ -33,8 +33,7 @@ thorax rotation:
 
 
 from __future__ import print_function
-import gaitutils
-from gaitutils import cfg
+from openpyxl import Workbook
 import matplotlib.pyplot as plt
 import glob
 import numpy as np
@@ -42,6 +41,10 @@ import sys
 import os
 import os.path as op
 import scipy
+import time
+
+import gaitutils
+from gaitutils import cfg
 
 
 def _get_data(subject):
@@ -50,6 +53,7 @@ def _get_data(subject):
     # parameters
     rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
     plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
+    max_dist = 15  # degrees, for outlier rejection
 
     Cfiles = list()
     Nfiles = list()
@@ -75,8 +79,8 @@ def _get_data(subject):
 
     print('%s: total of %d/%d trials' % (subject, len(Nfiles), len(Cfiles)))
 
-    C_avgdata, C_stddata, _, _ = gaitutils.stats.average_trials(Cfiles)
-    N_avgdata, N_stddata, _, _ = gaitutils.stats.average_trials(Nfiles)
+    C_avgdata, C_stddata, _, _ = gaitutils.stats.average_trials(Cfiles, max_dist=max_dist)
+    N_avgdata, N_stddata, _, _ = gaitutils.stats.average_trials(Nfiles, max_dist=max_dist)
 
     return N_avgdata, N_stddata, C_avgdata, C_stddata
 
@@ -106,8 +110,7 @@ def _get_vars(N_avgdata, C_avgdata):
                 results[cond][varname]['localext'] = data[varname][xind]
                 # local extrema during contact
                 xind_contact = xind[np.where(xind < 60)]
-                results[cond][varname]['contact_max'] = data[varname]
-                                                            [xind_contact]
+                results[cond][varname]['contact_max'] = data[varname][xind_contact]
     return results
 
 
@@ -120,6 +123,9 @@ vars_desc = dict()
 vars_desc['HipAnglesX'] = 'Hip flexion'
 vars_desc['HipAnglesX'] = 'Hip flexion at foot strike'
 
+# helper dicts
+sidestr = {'R': 'right', 'L': 'left'}
+condstr = {'C': 'cognitive', 'N': 'normal'}
 
 # data types wanted for each var
 wanted = dict()
@@ -136,62 +142,31 @@ N_avgdata, N_stddata, C_avgdata, C_stddata = _get_data(subject)
 
 res = _get_vars(N_avgdata, C_avgdata)
 
-# maybe ok but check dorsi/plant vs curves - might be due to no outlier rejection
 print('Subject %s' % subject)
-for cond in ['N', 'C']:
-    for side in ['R', 'L']:
-        print('\nCondition: %s' % ('normal' if cond == 'N' else 'cognitive'))
-        print('Side: %s' % ('right' if side == 'R' else 'left'))
-        print('Hip flexion at foot strike: %.3f' %
-              res[cond][side+'HipAnglesX']['at_foot_strike'])
-        print('Knee flexion at foot strike: %.3f' %
-              res[cond][side+'KneeAnglesX']['at_foot_strike'])
-        print('Ankle dorsi/plant at foot strike: %.3f' %
-              res[cond][side+'AnkleAnglesX']['at_foot_strike'])
-        print('Ankle dorsi/plant max. during contact phase: %.3f' %
-              res[cond][side+'AnkleAnglesX']['contact_max'])
-        print('Thorax lateral flex max. : %.3f' %
-              res[cond][side+'ThoraxAnglesY']['max'])
-        print('Thorax lateral flex min. : %.3f' %
-              res[cond][side+'ThoraxAnglesY']['min'])
-        print('Thorax rotation max. : %.3f' %
-              res[cond][side+'ThoraxAnglesZ']['max'])
-        print('Thorax rotation min. : %.3f' %
-              res[cond][side+'ThoraxAnglesZ']['min'])
 
+wb = Workbook()
+dest_filename = 'c:/Temp/gait_bigdata_%s.xlsx' % str(time.time())[:10]
+ws1 = wb.active
+ws1.title = "gait data"
+ws1.cell(column=1, row=6, value=subject)
+ws1.cell(column=1, row=5, value='Variable type')
+ws1.cell(column=1, row=4, value='Range')
+ws1.cell(column=1, row=3, value='Unit')
+ws1.cell(column=1, row=2, value='Variable')
 
-""" Write a line that can be pasted into Excel """
-row = ''
-hdr = ''
-print('Subject %s' % subject)
+col = 2  # start column
 for var in stats_vars:
     for want in wanted[var]:
         for cond in ['N', 'C']:
             for side in ['R', 'L']:
-                sidestr = {'R': 'right', 'L': 'left'}
-                condstr = {'C': 'cognitive', 'N': 'normal'}
-                hdr += '%s_%s (%s %s), ' % (var, want, condstr[cond], sidestr[side])
-                row += '%.3f, ' % (res[cond][side+var][want])
-print(hdr)
-print(row)
-
-from openpyxl import Workbook
-
-wb = Workbook()
-
-dest_filename = 'c:/Temp/test.xlsx'
-
-ws1 = wb.active
-ws1.title = "gait data"
-ws1.cell(column=1, row=6, value=subject)
-hdrli = hdr.split(',')
-rowli = row.split(',')
-for ind, var in enumerate(hdrli):
-    ws1.cell(column=ind+2, row=2, value=var)
-    ws1.cell(column=ind+2, row=3, value='degree')    # unit
-    ws1.cell(column=ind+2, row=4, value='')    # scale
-    ws1.cell(column=ind+2, row=5, value=1)    # type of var = 1 (continuous)
-    ws1.cell(column=ind+2, row=6, value=rowli[ind])
+                hdr = '%s_%s (%s %s)' % (var, want, condstr[cond], sidestr[side])
+                val =  '%.3f' % (res[cond][side+var][want])
+                ws1.cell(column=col, row=2, value=hdr)  # var name header
+                ws1.cell(column=col, row=3, value='degree')    # unit
+                ws1.cell(column=col, row=4, value='')    # scale
+                ws1.cell(column=col, row=5, value=1)    # type of var = 1 (continuous)
+                ws1.cell(column=col, row=6, value=val)  # value itself
+                col += 1
 
 wb.save(filename = dest_filename)
 
