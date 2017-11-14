@@ -76,15 +76,22 @@ extract['ThoraxAnglesZ']['strike'] = False
 extract['ThoraxAnglesZ']['contact_max'] = False
 
 # max. dist for detecting outlier curves
-max_dist = 15
+max_dist = 40
 
 
 def _process_data(subject, cond):
 
     # get list of files and average
     files = get_files(subject, cond)
-    avgdata, stddata, _, _ = gaitutils.stats.average_trials(files,
-                                                            max_dist=max_dist)
+    avgdata, stddata, N_ok, _ = gaitutils.stats.average_trials(files,
+                                                               max_dist=max_dist)
+
+    logger.debug('averaging stats for %s / %s:' % (subject, cond))
+    for varname_ in stats_vars:
+        for side in ['R', 'L']:
+            varname = side + varname_
+            logger.debug('%s: %d averages' % (varname, N_ok[varname]))
+
     # these are common for all vars
     range_ = ''
     type_ = 1

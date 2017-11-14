@@ -1,47 +1,54 @@
 # -*- coding: utf-8 -*-
 """
 
-Test consistency of CP trials
+CP-project:
+check trial data by overlay
 
 @author: Jussi (jnu@iki.fi)
 """
 
 
 import gaitutils
-import matplotlib.pyplot as plt
-import glob
-import numpy as np
+from cp_common import get_files
 
 
-# get files
-fnp = 'Z:\\Userdata_Vicon_Server\\CP-projekti\\TD25\\2017_5_11\\*_N*c3d'
-files = glob.glob(fnp)
+def _onpick(ev):
+    a = ev.artist
+    print '%s: cycle %s/%d' % (a._trialname, a._cycle.context, a._cycle.index)
 
+
+subject = 'TD26'
+cond = 'normal'
+
+files = get_files(subject, cond)
 
 pl = gaitutils.Plotter()
 
-
 vars = [['HipAnglesX', 'KneeAnglesX', 'AnkleAnglesX'],
         ['PelvisAnglesX', 'PelvisAnglesY', 'PelvisAnglesZ'],
-        ['ThoraxAnglesX', 'ThoraxAnglesY', 'ThoraxAnglesZ'], 
+        ['ThoraxAnglesX', 'ThoraxAnglesY', 'ThoraxAnglesZ'],
         ['ShoulderAnglesX', 'ShoulderAnglesY', 'ShoulderAnglesZ']]
 
 pl.layout = vars
+cant_read = list()
 
-
-for fn in files:
-
+for fn in files[:5]:
     pl.open_trial(fn)
+    # check if model vars can be read
+    try:
+        pl.trial['LHipAnglesX']
+    except (gaitutils.GaitDataError, KeyError):
+        cant_read.append(fn)
+        continue
+    pl.plot_trial(model_cycles='all', show=False, superpose=True,
+                  model_alpha=.5)
 
-    if pl.trial.cycles:
-        pl.plot_trial(model_cycles='all', show=False, superpose=True,
-                      model_alpha=.5)
-    else:
-        print 'no cycles for %s' % fn
+pl.set_title('%s: %s (%d files)' % (subject, cond, len(files)))
+
+pl.fig.canvas.mpl_connect('pick_event', _onpick)
 
 pl.show()
 
-
-
-
+if cant_read:
+    print 'could not read: %s' % cant_read
 
