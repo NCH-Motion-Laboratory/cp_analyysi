@@ -16,9 +16,7 @@ subject
 
 import logging
 import os.path as op
-from time import gmtime, strftime
-
-
+from time import localtime, strftime
 
 import cp_stats_from_curves
 import cp_walk_parameters
@@ -33,8 +31,9 @@ subjects = ['TD17', 'TD25', 'TD26', 'TD24', 'TD23', 'TD12', 'TD04', 'TD20',
 for subject in subjects:
     assert(op.isdir(op.join(rootdir, subject)))
 
+# name files according to script start time
+timestr_ = strftime("%Y_%m_%d-%H%M%S", localtime())
 # logfile - None for stdout logging
-timestr_ = strftime("%Y_%m_%d-%H%M%S", gmtime())
 logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
 # output file
 xls_filename = 'z:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
