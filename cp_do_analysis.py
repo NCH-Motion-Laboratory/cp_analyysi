@@ -35,7 +35,7 @@ for subject in subjects:
 
 # logfile - None for stdout logging
 timestr_ = strftime("%Y_%m_%d-%H%M%S", gmtime())
-logfile = 'c:/Temp/cp_analysis_log_%s.txt' % timestr_
+logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
 # output file
 xls_filename = 'z:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
 
