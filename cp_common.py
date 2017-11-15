@@ -20,8 +20,11 @@ plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
 
 # globs for each trial type
 globs = dict()
-globs['cognitive'] = '*_C?_*.c3d'  # glob for cognitive
-globs['normal'] = '*_N?_*.c3d'  # glob for normal
+globs['cognitive'] = ['*C?_*.c3d', '*K?_*.c3d']  # globs for cognitive
+globs['normal'] = ['*N?_*.c3d']  # globs for normal
+
+# exclude patterns - filenames including one of these will be dropped
+files_exclude = ['stance', 'one', 'foam']
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +34,13 @@ def get_files(subject, type):
     if type not in globs:
         raise Exception('Invalid trial type')
     else:
-        glob_ = globs[type]
+        globs_ = globs[type]
 
     # try to auto find data dirs under subject dir
     subjdir = op.join(rootdir, subject)
+    if not op.isdir(subjdir):
+        logger.warning('subject directory not found: %s' % subjdir)
+        return []
     datadirs = [file for file in os.listdir(subjdir) if
                 op.isdir(op.join(subjdir, file))]
     if len(datadirs) > 1:
@@ -42,16 +48,26 @@ def get_files(subject, type):
     datadir = datadirs[0]
 
     files = list()
-    glob_full = op.join(subjdir, datadir, glob_)
-    files += glob.glob(glob_full)
+    for glob_ in globs_:
+        glob_full = op.join(subjdir, datadir, glob_)
+        files.extend(glob.glob(glob_full))
 
-    if not files:
-        raise Exception('No trials for subject %s and glob %s' %
-                        (subject, glob_))
+    files_exc = [it for it in files if any([exc.lower() in it.lower()
+                 for exc in files_exclude])]
+
+    files = list(set(files) - set(files_exc))
+
+    #if not files:
+    #    raise Exception('No trials for subject %s and glob %s' %
+    #                    (subject, glob_))
     logger.debug('subject %s, %s trials: found %d files:'
                  % (subject, type, len(files)))
     for fn in files:
         logger.debug(fn)
+    if files_exc:
+        logger.debug('excluded files:')
+        for fn in files_exc:
+            logger.debug(fn)
     return files
 
 

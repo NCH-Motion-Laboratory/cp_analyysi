@@ -85,6 +85,9 @@ def _process_data(subject, cond):
     files = get_files(subject, cond)
     avgdata, stddata, N_ok, _ = gaitutils.stats.average_trials(files,
                                                                max_dist=max_dist)
+    if avgdata is None:
+        logger.debug('no data for %s / %s' % (subject, cond))
+        raise StopIteration
 
     logger.debug('averaging stats for %s / %s:' % (subject, cond))
     for varname_ in stats_vars:
@@ -100,7 +103,12 @@ def _process_data(subject, cond):
     for varname_ in stats_vars:
         for side in ['R', 'L']:
             varname = side + varname_
+            # FIXME: check for data = None (causes crash)
             data = avgdata
+            if data[varname] is None:
+                logger.debug('no data for %s / %s / %s' %
+                             (subject, cond, varname))
+                continue
             context = 'right' if side == 'R' else 'left'
             # value at foot strike
             extr = extract[varname_]
@@ -127,6 +135,7 @@ def _process_data(subject, cond):
 
 def get_results(subjects):
 
+    logger.debug('starting curve analysis')
     results = dict()
     for j, subject in enumerate(subjects):
         for cond in ['normal', 'cognitive']:
@@ -136,7 +145,7 @@ def get_results(subjects):
                     results[var] = r
                 else:
                     results[var].append(r[-1])
-    logger.debug('finished')
+    logger.debug('curve analysis finished')
     return results
 
 

@@ -15,25 +15,33 @@ subject
 """
 
 import logging
+import os.path as op
+from time import gmtime, strftime
+
+
 
 import cp_stats_from_curves
 import cp_walk_parameters
-from cp_common import write_workbook
+from cp_common import write_workbook, rootdir
 
 # subjects to analyze
-subjects = ['TD26', 'TD24', 'TD25', 'TD23']
-subjects = ['TD26', 'TD24']
-subjects = ['TD25', 'TD26', 'TD24', 'TD23', 'TD12', 'TD17', 'TD04', 'TD20',
-            'DP03', 'TD11', 'TD12', 'TD04', 'TD21', 'TD22', 'TD10', 'TD9',
-            'TD8', 'TD28', 'HP04', 'TD01']
+subjects = ['TD17', 'TD25', 'TD26', 'TD24', 'TD23', 'TD12', 'TD04', 'TD20',
+            'DP03', 'TD11', 'TD12', 'TD04', 'TD21', 'TD22', 'TD10', 'TD09',
+            'TD08', 'TD28', 'HP04', 'TD01']
+
+# check that all subj dirs exist
+for subject in subjects:
+    assert(op.isdir(op.join(rootdir, subject)))
 
 # logfile - None for stdout logging
-logfile = 'c:/Temp/cp_analysis_log_14112017.txt'
+timestr_ = strftime("%Y_%m_%d-%H%M%S", gmtime())
+logfile = 'c:/Temp/cp_analysis_log_%s.txt' % timestr_
 # output file
-xls_filename = 'c:/Temp/cp_analysis_14112017.xlsx'
+xls_filename = 'z:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
 
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
+
 # exclude some loggers to reduce noise
 logging.getLogger('gaitutils.trial').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.utils').setLevel(logging.WARNING)

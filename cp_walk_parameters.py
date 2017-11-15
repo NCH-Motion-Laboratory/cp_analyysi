@@ -87,8 +87,10 @@ def _process_data(datas, vars, cond):
 
 
 def get_results(subjects):
+    logger.debug('starting time-distance analysis')
     results = dict()
     for j, subject in enumerate(subjects):
+        logger.debug('processing subject %s' % subject)
         for cond in ['normal', 'cognitive']:
             datas = _read_data(subject, vars, cond)
             for r in _process_data(datas, vars, cond):
@@ -97,6 +99,6 @@ def get_results(subjects):
                     results[var] = r
                 else:
                     results[var].append(r[-1])
-    logger.debug('finished')
+    logger.debug('time-distance analysis finished')
     return results
 
