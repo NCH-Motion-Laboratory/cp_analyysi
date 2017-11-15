@@ -57,6 +57,15 @@ logger = logging.getLogger(__name__)
 stats_vars = ['HipAnglesX', 'KneeAnglesX', 'AnkleAnglesX',
               'ThoraxAnglesY', 'ThoraxAnglesZ']
 
+vars_desc = dict()
+vars_desc['HipAnglesX'] = 'Hip flexion'
+vars_desc['KneeAnglesX'] = 'Knee flexion'
+vars_desc['AnkleAnglesX'] = 'Ankle dorsi/plantarflexion'
+vars_desc['ThoraxAnglesY'] = 'Thorax lateral flex'
+vars_desc['ThoraxAnglesZ'] = 'Thorax rotation'
+
+
+
 # which values to extract for each variable - set undesired ones to False
 extract = {key: defaultdict(lambda: True) for key in stats_vars}
 extract['HipAnglesX']['max'] = False
@@ -113,15 +122,15 @@ def _process_data(subject, cond):
             # value at foot strike
             extr = extract[varname_]
             if extr['strike']:
-                yield ['%s at foot strike, %s %s' % (varname_, context, cond),
+                yield ['%s at foot strike, %s %s' % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, data[varname][0]]
             # maximum over cycle
             if extr['max']:
-                yield ['%s maximum, %s %s' % (varname_, context, cond),
+                yield ['%s maximum, %s %s' % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, data[varname].max()]
             # minimum over cycle
             if extr['min']:
-                yield ['%s minimum, %s %s' % (varname_, context, cond),
+                yield ['%s minimum, %s %s' % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, data[varname].min()]
             # maximum during contact phase
             if extr['contact_max']:
@@ -130,7 +139,7 @@ def _process_data(subject, cond):
                 cpm = (data[varname][xind_contact].max() if
                        len(xind_contact) > 0 else '')
                 yield ['%s max. during contact phase, %s %s'
-                       % (varname_, context, cond), unit_, range_, type_, cpm]
+                       % (vars_desc[varname_], context, cond), unit_, range_, type_, cpm]
 
 
 def get_results(subjects):
