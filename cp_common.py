@@ -24,7 +24,7 @@ globs['cognitive'] = ['*C?_*.c3d', '*K?_*.c3d']  # globs for cognitive
 globs['normal'] = ['*N?_*.c3d']  # globs for normal
 
 # exclude patterns - filenames including one of these will be dropped
-files_exclude = ['stance', 'one', 'foam']
+files_exclude = ['stance', 'one', 'foam', 'hop']
 
 logger = logging.getLogger(__name__)
 

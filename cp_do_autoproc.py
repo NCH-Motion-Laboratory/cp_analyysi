@@ -33,7 +33,7 @@ for glob_ in globs_:
     glob_full = op.join(rootdir, glob_)
     subjects.extend(glob.glob(glob_full))
 
-# strip paths for get_files
+# strip paths for get_files()
 subjects = [op.split(subj)[-1] for subj in subjects]
 
 vi = gaitutils.nexus.viconnexus()
