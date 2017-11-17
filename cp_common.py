@@ -31,44 +31,52 @@ logger = logging.getLogger(__name__)
 
 def get_files(subject, type):
     """Get trial files according to given subject and trial type"""
+   
     if type not in globs:
         raise Exception('Invalid trial type')
     else:
         globs_ = globs[type]
 
+    logger.debug('finding trial files for %s' % subject)
     # try to auto find data dirs under subject dir
     subjdir = op.join(rootdir, subject)
     if not op.isdir(subjdir):
         logger.warning('Subject directory not found: %s' % subjdir)
         return []
+
     datadirs = [file for file in os.listdir(subjdir) if
                 op.isdir(op.join(subjdir, file))]
-    if len(datadirs) > 1:
-        raise Exception('Multiple data dirs under subject %s' % subject)
-    datadir = datadirs[0]
 
-    files = list()
-    for glob_ in globs_:
-        glob_full = op.join(subjdir, datadir, glob_)
-        files.extend(glob.glob(glob_full))
+    for datadir in datadirs:
 
-    files_exc = [it for it in files if any([exc.lower() in it.lower()
-                 for exc in files_exclude])]
+        logger.debug('trying data dir %s' % datadir)
+        files = list()
+        for glob_ in globs_:
+            glob_full = op.join(subjdir, datadir, glob_)
+            files.extend(glob.glob(glob_full))
 
-    files = list(set(files) - set(files_exc))
+        files_exc = [it for it in files if any([exc.lower() in it.lower()
+                     for exc in files_exclude])]
 
-    #if not files:
-    #    raise Exception('No trials for subject %s and glob %s' %
-    #                    (subject, glob_))
-    logger.debug('subject %s, %s trials: found %d files:'
-                 % (subject, type, len(files)))
-    for fn in files:
-        logger.debug(fn)
-    if files_exc:
-        logger.debug('excluded files:')
-        for fn in files_exc:
+        files = list(set(files) - set(files_exc))
+
+        # does it look like a proper datadir?
+        if len(files) < 10:
+            logger.debug('%s is probably not a CP data dir' % datadir)
+            continue
+
+        logger.debug('subject %s, %s trials: found %d files:'
+                     % (subject, type, len(files)))
+        for fn in files:
             logger.debug(fn)
-    return files
+        if files_exc:
+            logger.debug('excluded files:')
+            for fn in files_exc:
+                logger.debug(fn)
+        return files
+
+    logger.warning('no files found for %s' % subject)
+    return []
 
 
 def write_workbook(results, filename, first_col=1, first_row=1):

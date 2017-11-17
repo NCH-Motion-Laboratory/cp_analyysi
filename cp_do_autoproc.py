@@ -23,6 +23,7 @@ logfile = 'z:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % timestr_
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
 
+# use the special config for CP project
 cfg_file = 'c:/Users/Vicon123/.gaitutils_cp_projekti.cfg'
 cfg.read(cfg_file)
 
