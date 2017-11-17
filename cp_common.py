@@ -39,12 +39,12 @@ def get_files(subject, type):
     # try to auto find data dirs under subject dir
     subjdir = op.join(rootdir, subject)
     if not op.isdir(subjdir):
-        logger.warning('subject directory not found: %s' % subjdir)
+        logger.warning('Subject directory not found: %s' % subjdir)
         return []
     datadirs = [file for file in os.listdir(subjdir) if
                 op.isdir(op.join(subjdir, file))]
     if len(datadirs) > 1:
-        raise Exception('Multiple data dirs under subject')
+        raise Exception('Multiple data dirs under subject %s' % subject)
     datadir = datadirs[0]
 
     files = list()
