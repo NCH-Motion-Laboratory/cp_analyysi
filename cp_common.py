@@ -20,18 +20,20 @@ plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
 
 # globs for each trial type
 globs = dict()
-globs['cognitive'] = ['*C?_*.c3d', '*K?_*.c3d']  # globs for cognitive
-globs['normal'] = ['*N?_*.c3d']  # globs for normal
+globs['cognitive'] = ['*C?_*', '*K?_*']  # globs for cognitive trials
+globs['normal'] = ['*N?_*']  # globs for normal
+globs['tray'] = ['*T?_*']  # globs for tray trials
 
 # exclude patterns - filenames including one of these will be dropped
-files_exclude = ['stance', 'one', 'foam', 'hop']
+files_exclude = ['stance', 'one', 'foam', 'hop', 'stand']
 
 logger = logging.getLogger(__name__)
 
 
-def get_files(subject, type):
-    """Get trial files according to given subject and trial type"""
-   
+def get_files(subject, type, ext='.c3d'):
+    """ Get trial files according to given subject and trial type
+    (e.g. 'normal') and file extension """
+
     if type not in globs:
         raise Exception('Invalid trial type')
     else:
@@ -49,9 +51,10 @@ def get_files(subject, type):
 
     for datadir in datadirs:
 
-        logger.debug('trying data dir %s' % datadir)
+        logger.debug('trying data dir %s/%s' % (subject, datadir))
         files = list()
         for glob_ in globs_:
+            glob_ += ext
             glob_full = op.join(subjdir, datadir, glob_)
             files.extend(glob.glob(glob_full))
 

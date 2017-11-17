@@ -39,17 +39,23 @@ subjects = [op.split(subj)[-1] for subj in subjects]
 
 vi = gaitutils.nexus.viconnexus()
 
+logging.debug('start global autoproc for %s' % subjects)
+
 # run autoproc for each subject
 for subject in subjects:
-    # need to open trial to get Nexus to switch sessions
-    c3ds = get_files(subject, 'normal')
+    # look for x1d instead of c3d (c3d files may not exist yet)
+    c3ds = get_files(subject, 'normal', ext='.x1d')
     if not c3ds:
         logging.warning('no files for %s, skipping' % subject)
         continue
     c3d = op.splitext(c3ds[0])[0]
+    # need to open trial to get Nexus to switch sessions
     vi.OpenTrial(c3d, 60)
     try:
         autoproc_session()
     except gaitutils.GaitDataError:
         logging.warning('autoproc error for %s, skipping' % subject)
         continue
+
+logging.debug('global autoproc finished')
+print 'done'
