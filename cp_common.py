@@ -13,7 +13,9 @@ import glob
 import os
 import os.path as op
 from openpyxl import Workbook
+from time import localtime, strftime
 import logging
+
 
 # some global parameters
 rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
@@ -32,6 +34,12 @@ globs['tray'] = ['*T?_*']  # globs for tray trials
 files_exclude = ['stance', 'one', 'foam', 'hop', 'stand']
 
 logger = logging.getLogger(__name__)
+
+
+def get_timestr():
+    """ Get a second-resolution timestr (current time) that can be put into
+    file names etc. """
+    return strftime("%Y_%m_%d-%H%M%S", localtime())
 
 
 def get_subjects():

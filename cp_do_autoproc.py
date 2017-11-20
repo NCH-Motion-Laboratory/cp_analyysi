@@ -12,12 +12,10 @@ from time import localtime, strftime
 import gaitutils
 from gaitutils.nexus_scripts.nexus_autoprocess_session import autoproc_session
 from gaitutils import cfg
-from cp_common import get_files, get_subjects
+from cp_common import get_files, get_subjects, get_timestr
 
-# name files according to script start time
-timestr_ = strftime("%Y_%m_%d-%H%M%S", localtime())
 # logfile - None for stdout logging
-logfile = 'z:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % timestr_
+logfile = 'z:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % get_timestr()
 
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')

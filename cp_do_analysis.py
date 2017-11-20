@@ -15,17 +15,16 @@ subject
 """
 
 import logging
-from time import localtime, strftime
+
 
 import cp_stats_from_curves
 import cp_walk_parameters
-from cp_common import write_workbook, get_subjects
+from cp_common import write_workbook, get_subjects, get_timestr
 
 
 subjects = get_subjects()
 
-# name files according to script start time
-timestr_ = strftime("%Y_%m_%d-%H%M%S", localtime())
+timestr_ = get_timestr()
 # logfile - None for stdout logging
 logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
 # output file
