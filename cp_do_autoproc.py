@@ -8,13 +8,11 @@ Autoprocess all CP subjects
 import logging
 import os.path as op
 from time import localtime, strftime
-import glob
-from random import shuffle
 
 import gaitutils
 from gaitutils.nexus_scripts.nexus_autoprocess_session import autoproc_session
 from gaitutils import cfg
-from cp_common import get_files, rootdir
+from cp_common import get_files, get_subjects
 
 # name files according to script start time
 timestr_ = strftime("%Y_%m_%d-%H%M%S", localtime())
@@ -28,18 +26,7 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG,
 cfg_file = 'c:/Users/Vicon123/.gaitutils_cp_projekti.cfg'
 cfg.read(cfg_file)
 
-# find all subjects
-globs_ = ['TD*', 'HP*', 'DP*']
-subjects = list()
-for glob_ in globs_:
-    glob_full = op.join(rootdir, glob_)
-    subjects.extend(glob.glob(glob_full))
-
-# strip paths for get_files()
-subjects = [op.split(subj)[-1] for subj in subjects]
-# randomize order for debug purposes
-shuffle(subjects)
-
+subjects = get_subjects()
 
 vi = gaitutils.nexus.viconnexus()
 

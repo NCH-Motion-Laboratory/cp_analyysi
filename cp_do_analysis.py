@@ -15,21 +15,14 @@ subject
 """
 
 import logging
-import os.path as op
 from time import localtime, strftime
 
 import cp_stats_from_curves
 import cp_walk_parameters
-from cp_common import write_workbook, rootdir
+from cp_common import write_workbook, get_subjects
 
-# subjects to analyze
-subjects = ['TD17', 'TD25', 'TD26', 'TD24', 'TD23', 'TD12', 'TD04', 'TD20',
-            'DP03', 'TD11', 'TD12', 'TD04', 'TD21', 'TD22', 'TD10', 'TD09',
-            'TD08', 'TD28', 'HP04', 'TD01']
 
-# check that all subj dirs exist
-for subject in subjects:
-    assert(op.isdir(op.join(rootdir, subject)))
+subjects = get_subjects()
 
 # name files according to script start time
 timestr_ = strftime("%Y_%m_%d-%H%M%S", localtime())

@@ -8,6 +8,7 @@ shared defs for CP project
 
 
 from __future__ import print_function
+from random import shuffle
 import glob
 import os
 import os.path as op
@@ -17,6 +18,9 @@ import logging
 # some global parameters
 rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
 plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
+
+# subject name globs
+subj_globs_ = ['TD*', 'HP*', 'DP*']
 
 # globs for each trial type
 globs = dict()
@@ -28,6 +32,18 @@ globs['tray'] = ['*T?_*']  # globs for tray trials
 files_exclude = ['stance', 'one', 'foam', 'hop', 'stand']
 
 logger = logging.getLogger(__name__)
+
+
+def get_subjects():
+    """ Get list of all subject names, e.g. 'TD01' """
+    subjects = list()
+    for glob_ in subj_globs_:
+        glob_full = op.join(rootdir, glob_)
+        subjects.extend(glob.glob(glob_full))
+    # strip paths for get_files()
+    subjects = [op.split(subj)[-1] for subj in subjects]
+    # randomize order for debug purposes
+    shuffle(subjects)
 
 
 def get_files(subject, type, ext='.c3d'):
