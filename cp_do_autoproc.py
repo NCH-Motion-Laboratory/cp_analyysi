@@ -26,23 +26,22 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG,
 cfg_file = 'c:/Users/Vicon123/.gaitutils_cp_projekti.cfg'
 cfg.read(cfg_file)
 
-subjects = get_subjects()
-
 vi = gaitutils.nexus.viconnexus()
 
+subjects = get_subjects()
 logging.debug('start global autoproc for %d subjects:' % len(subjects))
 logging.debug('%s' % subjects)
 
 # run autoproc for each subject
 for subject in subjects:
     # look for x1d instead of c3d (c3d files may not exist yet)
-    c3ds = get_files(subject, 'normal', ext='.x1d')
-    if not c3ds:
+    trials_ = get_files(subject, 'normal', ext='.x1d')
+    if not trials_:
         logging.warning('no files for %s, skipping' % subject)
         continue
-    c3d = op.splitext(c3ds[0])[0]
+    trial_ = op.splitext(trials_[0])[0]
     # need to open trial to get Nexus to switch sessions
-    vi.OpenTrial(c3d, 60)
+    vi.OpenTrial(trial_, 60)
     try:
         autoproc_session()
     except gaitutils.GaitDataError:
