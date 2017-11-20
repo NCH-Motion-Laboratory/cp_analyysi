@@ -9,6 +9,7 @@ import logging
 import os.path as op
 from time import localtime, strftime
 import glob
+from random import shuffle
 
 import gaitutils
 from gaitutils.nexus_scripts.nexus_autoprocess_session import autoproc_session
@@ -36,10 +37,14 @@ for glob_ in globs_:
 
 # strip paths for get_files()
 subjects = [op.split(subj)[-1] for subj in subjects]
+# randomize order for debug purposes
+shuffle(subjects)
+
 
 vi = gaitutils.nexus.viconnexus()
 
-logging.debug('start global autoproc for %s' % subjects)
+logging.debug('start global autoproc for %d subjects:' % len(subjects))
+logging.debug('%s' % subjects)
 
 # run autoproc for each subject
 for subject in subjects:
