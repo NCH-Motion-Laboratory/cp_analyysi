@@ -52,6 +52,7 @@ def get_subjects():
     subjects = [op.split(subj)[-1] for subj in subjects]
     # randomize order for debug purposes
     shuffle(subjects)
+    return subjects
 
 
 def get_files(subject, type, ext='.c3d'):

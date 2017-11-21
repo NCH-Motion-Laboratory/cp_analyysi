@@ -22,8 +22,6 @@ import cp_walk_parameters
 from cp_common import write_workbook, get_subjects, get_timestr
 
 
-subjects = get_subjects()
-
 timestr_ = get_timestr()
 # logfile - None for stdout logging
 logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
@@ -41,9 +39,13 @@ logging.getLogger('gaitutils.eclipse').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.c3d').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 
+subjects = get_subjects()
+
 results_all = dict()
 results_all.update(cp_stats_from_curves.get_results(subjects))
 results_all.update(cp_walk_parameters.get_results(subjects))
+
+# FIXME: need to sort by subject here (see bigdata xls)
 
 write_workbook([['']*4 + subjects] + sorted(results_all.values()),
                xls_filename)
