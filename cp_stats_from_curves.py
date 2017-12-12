@@ -96,7 +96,7 @@ def _process_data(subject, cond):
                                                                max_dist=max_dist)
     if avgdata is None:
         logger.debug('no data for %s / %s' % (subject, cond))
-        raise StopIteration
+        raise ValueError('no data for %s / %s' % (subject, cond))
 
     logger.debug('averaging stats for %s / %s:' % (subject, cond))
     for varname_ in stats_vars:
@@ -156,8 +156,6 @@ def get_results(subjects):
                     results[var].append(r[-1])
     logger.debug('curve analysis finished')
     return results
-
-
 
 
 

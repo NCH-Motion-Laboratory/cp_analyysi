@@ -16,7 +16,6 @@ subject
 
 import logging
 
-
 import cp_stats_from_curves
 import cp_walk_parameters
 from cp_common import write_workbook, get_subjects, get_timestr
@@ -42,12 +41,12 @@ logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 subjects = get_subjects()
 
 results_all = dict()
-results_all.update(cp_stats_from_curves.get_results(subjects))
-results_all.update(cp_walk_parameters.get_results(subjects))
+results_curves = cp_stats_from_curves.get_results(subjects)
+results_params = cp_walk_parameters.get_results(subjects)
+
+results_all.update(results_curves)
+results_all.update(results_params)
 
 # FIXME: need to sort by subject here (see bigdata xls)
-
 write_workbook([['']*4 + subjects] + sorted(results_all.values()),
                xls_filename)
-
-

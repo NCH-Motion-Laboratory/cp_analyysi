@@ -53,6 +53,10 @@ def _read_data(subject, vars, cond):
 def _process_data(datas, vars, cond):
     """Yields lists for each variable"""
 
+    if not datas:
+        logger.debug('no data')
+        return
+
     # for picking units
     data0 = datas.values()[0]
 
