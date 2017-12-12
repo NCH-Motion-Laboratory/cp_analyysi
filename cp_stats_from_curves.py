@@ -95,7 +95,7 @@ def _process_data(subject, cond):
     avgdata, stddata, N_ok, _ = gaitutils.stats.average_trials(files,
                                                                max_dist=max_dist)
     if avgdata is None:
-        logger.debug('no data for %s / %s' % (subject, cond))
+        logger.warning('no data for %s / %s, terminating' % (subject, cond))
         raise ValueError('no data for %s / %s' % (subject, cond))
 
     logger.debug('averaging stats for %s / %s:' % (subject, cond))
@@ -112,11 +112,10 @@ def _process_data(subject, cond):
     for varname_ in stats_vars:
         for side in ['R', 'L']:
             varname = side + varname_
-            # FIXME: check for data = None (causes crash)
             data = avgdata
             if data[varname] is None:
-                logger.debug('no data for %s / %s / %s' %
-                             (subject, cond, varname))
+                logger.warning('no data for %s / %s / %s' %
+                               (subject, cond, varname))
                 continue
             context = 'right' if side == 'R' else 'left'
             # value at foot strike

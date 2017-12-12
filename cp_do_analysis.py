@@ -26,6 +26,8 @@ timestr_ = get_timestr()
 logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
 # output file
 xls_filename = 'z:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
+# whom to exclude
+subjects_exclude = ['HP12', 'TD30', 'TD02']
 
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
@@ -38,7 +40,8 @@ logging.getLogger('gaitutils.eclipse').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.c3d').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 
-subjects = get_subjects()
+
+subjects = [s for s in get_subjects() if s not in subjects_exclude]
 
 results_all = dict()
 results_curves = cp_stats_from_curves.get_results(subjects)

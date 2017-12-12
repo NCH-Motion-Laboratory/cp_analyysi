@@ -54,8 +54,8 @@ def _process_data(datas, vars, cond):
     """Yields lists for each variable"""
 
     if not datas:
-        logger.debug('no data')
-        return
+        logger.debug('no data, terminating')
+        raise ValueError('No data')
 
     # for picking units
     data0 = datas.values()[0]
