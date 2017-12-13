@@ -55,14 +55,20 @@ def get_subjects():
     return subjects
 
 
-def get_files(subject, type, ext='.c3d'):
+def get_files(subject, types, ext='.c3d'):
     """ Get trial files according to given subject and trial type
     (e.g. 'normal') and file extension """
 
-    if type not in globs:
-        raise Exception('Invalid trial type')
-    else:
-        globs_ = globs[type]
+    if not isinstance(types, list):
+        types = [types]
+
+    globs_ = list()
+
+    for t in types:
+        if t not in globs:
+            raise Exception('Invalid trial type')
+        else:
+            globs_ += globs[t]
 
     logger.debug('finding trial files for %s' % subject)
     # try to auto find data dirs under subject dir
