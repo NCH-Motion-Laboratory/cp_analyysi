@@ -28,12 +28,18 @@ subjects = get_subjects()
 for subj in subjects:
     trials += get_files(subj, trial_types)
 shuffle(trials)
+print 'Got trials'
 
 trials_ = trials[:N]
-write_workbook([trials_], xls_filename)
+#write_workbook([trials_], xls_filename)
 
 vicon = gaitutils.nexus.viconnexus()
 
 for trial in trials_:
-    vicon.OpenTrial(op.splitext(trial)[0], 200)
-    print 'Opened %s, press enter to open next trial'
+    trialbase = op.splitext(trial)[0]
+    vicon.OpenTrial(trialbase, 200)
+    print 'Opened %s:' % trial
+    desc = gaitutils.eclipse.get_eclipse_keys(trialbase + '.Trial.enf')['DESCRIPTION']
+    print desc
+    print 'Press enter to open next trial'
+    raw_input()
