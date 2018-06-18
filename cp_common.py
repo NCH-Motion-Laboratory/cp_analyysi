@@ -18,7 +18,7 @@ import logging
 
 
 # some global parameters
-rootdir = 'Z:\\Userdata_Vicon_Server\\CP-projekti'
+rootdir = 'K:\\CP_projekti_kopio'
 plotdir = "Z:\\CP_projekti_analyysit\\Normal_vs_cognitive"
 
 # subject name globs

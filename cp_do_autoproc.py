@@ -2,8 +2,6 @@
 """
 Autoprocess all CP subjects
 
-Nexus hangs cause problems - maybe try moving files to local disk?
-
 @author: Jussi (jnu@iki.fi)
 """
 
@@ -11,11 +9,10 @@ import subprocess
 import time
 import logging
 import os.path as op
-import os
 
 import gaitutils
 from gaitutils.nexus_scripts.nexus_autoprocess_session import autoproc_session
-from gaitutils import cfg, nexus
+from gaitutils import cfg
 from cp_common import get_files, get_subjects, get_timestr
 
 
@@ -36,7 +33,7 @@ def _kill_nexus(p):
 
 
 # logfile - None for stdout logging
-logfile = 'z:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % get_timestr()
+logfile = 'k:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % get_timestr()
 
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
@@ -46,12 +43,44 @@ cfg_file = 'c:/Users/Vicon123/.gaitutils_cp_projekti.cfg'
 cfg.read(cfg_file)
 
 # process subjects that were not already processed
-subjects_done = ['TD04']
+subjects_done = ['HP08',
+                 'TD22',
+                 'TD07',
+                 'TD17',
+                 'TD24',
+                 'TD26',
+                 'TD02',
+                 'TD10',
+                 'DP03',
+                 'TD01',
+                 'HP06',
+                 'TD23',
+                 'TD08',
+                 'TD25',
+                 'TD3',
+                 'TD11',
+                 'HP02',
+                 'TD28',
+                 'TD13',
+                 'TD21',
+                 'TD04',
+                 'HP04',
+                 'TD20',
+                 'TD05',
+                 'TD12',
+                 'TD09',
+                 'HP03',
+                 'HP10',
+                 'HP09',
+                 'HP12',
+                 'TD30',
+                 'DP05']
 subjects_all = get_subjects()
 subjects = list(set(subjects_all) - set(subjects_done))
-
 # or specify a list
-subjects = ['TD07', 'HP10', 'HP09']
+# subjects = ['TD07', 'HP10', 'HP09']
+# or do all
+# subjects = get_subjects()
 
 logging.debug('start global autoproc for %d subjects:' % len(subjects))
 logging.debug('%s' % subjects)
