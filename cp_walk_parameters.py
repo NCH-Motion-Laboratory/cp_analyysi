@@ -33,7 +33,8 @@ vars = ['Stride Time',
 def _read_data(subject, vars, cond):
     """ Returns a dict of parameters for each trial """
     Cfiles = get_files(subject, cond)
-    datas = {f: c3d.get_c3d_analysis(f) for f in Cfiles}
+    # 'unknown' is the default condition name
+    datas = {f: c3d.get_analysis(f)['unknown'] for f in Cfiles}
     datas_ok = {f: data for f, data in datas.items()
                 if all([var in data for var in vars])}
     logger.debug('%s/%s: %d files read, %d files contained data' %
@@ -73,7 +74,11 @@ def _process_data(datas, vars, cond):
                                  (var, context, f))
                 else:
                     thisdata = data[var][context]
-                    results[var][context].append(thisdata)
+                    if thisdata is not None:
+                        results[var][context].append(thisdata)
+                    else:
+                        logger.debug('data is None for %s: %s in file %s' %
+                                     (var, context, f))
 
     # these are common to all vars
     range_ = ''

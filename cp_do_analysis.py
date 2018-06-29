@@ -23,9 +23,9 @@ from cp_common import write_workbook, get_subjects, get_timestr
 
 timestr_ = get_timestr()
 # logfile - None for stdout logging
-logfile = 'z:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
+logfile = 'k:/CP_projekti_analyysit/cp_analysis_log_%s.txt' % timestr_
 # output file
-xls_filename = 'z:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
+xls_filename = 'k:/CP_projekti_analyysit/cp_analysis_%s.xlsx' % timestr_
 # whom to exclude
 subjects_exclude = ['HP12', 'TD30', 'TD02']
 
