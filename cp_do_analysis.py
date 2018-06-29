@@ -49,6 +49,5 @@ results_params = cp_walk_parameters.get_results(subjects)
 results_all.update(results_curves)
 results_all.update(results_params)
 
-# FIXME: need to sort by subject here (see bigdata xls)
 write_workbook([['']*4 + subjects] + sorted(results_all.values()),
                xls_filename)

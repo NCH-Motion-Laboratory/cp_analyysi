@@ -100,7 +100,7 @@ def get_files(subject, types, ext='.c3d'):
             continue
 
         logger.debug('subject %s, %s trials: found %d files:'
-                     % (subject, type, len(files)))
+                     % (subject, '/'.join(types), len(files)))
         for fn in files:
             logger.debug(fn)
         if files_exc:
