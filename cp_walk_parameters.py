@@ -13,8 +13,8 @@ import logging
 from gaitutils import c3d
 from cp_common import get_files
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 # analysis vars of interest
 vars = ['Stride Time',
@@ -110,4 +110,3 @@ def get_results(subjects):
                     results[var].append(r[-1])
     logger.debug('time-distance analysis finished')
     return results
-

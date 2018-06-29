@@ -40,8 +40,7 @@ logging.getLogger('gaitutils.eclipse').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.c3d').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 
-
-subjects = [s for s in get_subjects() if s not in subjects_exclude]
+subjects = sorted(list(set(get_subjects()) - set(subjects_exclude)))
 
 results_all = dict()
 results_curves = cp_stats_from_curves.get_results(subjects)
