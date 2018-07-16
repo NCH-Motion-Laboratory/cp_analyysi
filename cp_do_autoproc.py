@@ -33,7 +33,7 @@ def _kill_nexus(p):
 
 
 # trial types to process
-trial_types = ['normal', 'cognitive', 'tray']
+trial_types = ['normal', 'cognitive']
 
 # logfile - None for stdout logging
 logfile = 'k:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % get_timestr()
@@ -105,8 +105,6 @@ for subject in subjects:
         _do_autoproc(enffiles)
     except gaitutils.GaitDataError:
         logging.warning('autoproc error for %s, skipping' % subject)
-        _kill_nexus(p)
-        continue
     _kill_nexus(p)
 
 logging.debug('global autoproc finished')
