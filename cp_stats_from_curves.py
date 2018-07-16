@@ -121,15 +121,18 @@ def _process_data(subject, cond):
             # value at foot strike
             extr = extract[varname_]
             if extr['strike']:
-                yield ['%s at foot strike, %s %s' % (vars_desc[varname_], context, cond),
+                yield ['%s at foot strike, %s %s' % (vars_desc[varname_],
+                                                     context, cond),
                        unit_, range_, type_, data[varname][0]]
             # maximum over cycle
             if extr['max']:
-                yield ['%s maximum, %s %s' % (vars_desc[varname_], context, cond),
+                yield ['%s maximum, %s %s' % (vars_desc[varname_],
+                                              context, cond),
                        unit_, range_, type_, data[varname].max()]
             # minimum over cycle
             if extr['min']:
-                yield ['%s minimum, %s %s' % (vars_desc[varname_], context, cond),
+                yield ['%s minimum, %s %s' % (vars_desc[varname_],
+                                              context, cond),
                        unit_, range_, type_, data[varname].min()]
             # maximum during contact phase
             if extr['contact_max']:
@@ -138,7 +141,8 @@ def _process_data(subject, cond):
                 cpm = (data[varname][xind_contact].max() if
                        len(xind_contact) > 0 else '')
                 yield ['%s max. during contact phase, %s %s'
-                       % (vars_desc[varname_], context, cond), unit_, range_, type_, cpm]
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
 
 
 def get_results(subjects):
@@ -155,12 +159,3 @@ def get_results(subjects):
                     results[var].append(r[-1])
     logger.debug('curve analysis finished')
     return results
-
-
-
-
-
-
-
-
-

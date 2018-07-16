@@ -31,7 +31,8 @@ globs['normal'] = ['*N?_*']  # globs for normal
 globs['tray'] = ['*T?_*']  # globs for tray trials
 
 # exclude patterns - filenames including one of these will be dropped
-files_exclude = ['stance', 'one', 'foam', 'hop', 'stand', 'balance']
+files_exclude = ['stance', 'one', 'foam', 'hop', 'stand', 'balance',
+                 'toes', 'toget', 'loitonnus', 'abduction']
 
 logger = logging.getLogger(__name__)
 

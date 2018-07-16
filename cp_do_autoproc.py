@@ -11,7 +11,7 @@ import logging
 import os.path as op
 
 import gaitutils
-from gaitutils.nexus_scripts.nexus_autoprocess_session import autoproc_session
+from gaitutils.nexus_scripts.nexus_autoprocess_session import _do_autoproc
 from gaitutils import cfg
 from cp_common import get_files, get_subjects, get_timestr
 
@@ -31,6 +31,9 @@ def _kill_nexus(p):
     p.terminate()
     time.sleep(5)
 
+
+# trial types to process
+trial_types = ['normal', 'cognitive', 'tray']
 
 # logfile - None for stdout logging
 logfile = 'k:/CP_projekti_analyysit/cp_autoprocess_log_%s.txt' % get_timestr()
@@ -80,7 +83,7 @@ subjects = list(set(subjects_all) - set(subjects_done))
 # or specify a list
 # subjects = ['TD07', 'HP10', 'HP09']
 # or do all
-# subjects = get_subjects()
+subjects = get_subjects()
 
 logging.debug('start global autoproc for %d subjects:' % len(subjects))
 logging.debug('%s' % subjects)
@@ -98,7 +101,8 @@ for subject in subjects:
     # need to open trial to get Nexus to switch sessions
     vi.OpenTrial(trial_, 60)
     try:
-        autoproc_session()
+        enffiles = get_files(subject, trial_types, ext='.Trial.enf')
+        _do_autoproc(enffiles)
     except gaitutils.GaitDataError:
         logging.warning('autoproc error for %s, skipping' % subject)
         _kill_nexus(p)
