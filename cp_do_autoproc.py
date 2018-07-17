@@ -81,9 +81,9 @@ subjects_done = ['HP08',
 subjects_all = get_subjects()
 subjects = list(set(subjects_all) - set(subjects_done))
 # or specify a list
-# subjects = ['TD07', 'HP10', 'HP09']
+subjects = ['HP12']
 # or do all
-subjects = get_subjects()
+# subjects = get_subjects()
 
 logging.debug('start global autoproc for %d subjects:' % len(subjects))
 logging.debug('%s' % subjects)

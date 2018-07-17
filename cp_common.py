@@ -15,6 +15,7 @@ import os.path as op
 from openpyxl import Workbook
 from time import localtime, strftime
 import logging
+import shutil
 
 
 # some global parameters
@@ -54,6 +55,54 @@ def get_subjects():
     # randomize order for debug purposes
     shuffle(subjects)
     return subjects
+
+
+def make_clinical_copy(subject, destroot):
+    """Make a copy of session with relevant trials only under destroot dir"""
+    subjdir = op.join(rootdir, subject)
+    if not op.isdir(subjdir):
+        raise ValueError('Subject dir %s not found' % subjdir)
+
+    datadirs = [dirn for dirn in os.listdir(subjdir) if
+                op.isdir(op.join(subjdir, dirn))]
+
+    if not datadirs:
+        raise ValueError('Subject dir %s does not contain any sessions'
+                         % subjdir)
+
+    if len(datadirs) > 1:
+        raise ValueError('Subject dir %s contains multiple sessions'
+                         % subjdir)
+    datadir = datadirs[0]
+    globs_ = globs['normal']
+
+    # add other session files
+    globs_.append('*Session.enf')
+    globs_.append('*mp')
+    globs_.append('*mkr')
+    globs_.append('*sup')
+    globs_.append('*vsk')
+
+    files = list()
+    for glob_ in globs_:
+        glob_full = op.join(subjdir, datadir, glob_)
+        files.extend(glob.glob(glob_full))
+
+    # copy all files into new session dir
+    subjdir_new = op.join(destroot, subject)
+    if not op.isdir(subjdir_new):
+        os.mkdir(subjdir_new)
+    datadir_new = op.join(subjdir_new, datadir)
+    if not op.isdir(datadir_new):
+        os.mkdir(datadir_new)
+    for f in files:
+        shutil.copy2(f, datadir_new)
+
+    # copy patient .enf into patient dir
+    glob_full = op.join(subjdir, datadir, '*Patient.enf')
+    patient_enf = glob.glob(glob_full)
+    for f in patient_enf:
+        shutil.copy2(f, subjdir_new)
 
 
 def get_files(subject, types, ext='.c3d'):
