@@ -54,10 +54,14 @@ from gaitutils import cfg
 logger = logging.getLogger(__name__)
 
 # the vars of interest
-stats_vars = ['HipAnglesX', 'KneeAnglesX', 'AnkleAnglesX',
+stats_vars = ['PelvisAnglesX', 'PelvisAnglesY', 'PelvisAnglesZ',
+              'HipAnglesX', 'KneeAnglesX', 'AnkleAnglesX',
               'ThoraxAnglesY', 'ThoraxAnglesZ']
 
 vars_desc = dict()
+vars_desc['PelvisAnglesX'] = 'Pelvic tilt'
+vars_desc['PelvisAnglesY'] = 'Pelvic obliquity'
+vars_desc['PelvisAnglesZ'] = 'Pelvic rotation'
 vars_desc['HipAnglesX'] = 'Hip flexion'
 vars_desc['KneeAnglesX'] = 'Knee flexion'
 vars_desc['AnkleAnglesX'] = 'Ankle dorsi/plantarflexion'
@@ -68,6 +72,7 @@ vars_desc['ThoraxAnglesZ'] = 'Thorax rotation'
 
 # which values to extract for each variable - set undesired ones to False
 extract = {key: defaultdict(lambda: True) for key in stats_vars}
+"""
 extract['HipAnglesX']['max'] = False
 extract['HipAnglesX']['min'] = False
 extract['HipAnglesX']['contact_max'] = False
@@ -83,6 +88,7 @@ extract['ThoraxAnglesY']['contact_max'] = False
 
 extract['ThoraxAnglesZ']['strike'] = False
 extract['ThoraxAnglesZ']['contact_max'] = False
+"""
 
 # max. dist for detecting outlier curves
 max_dist = 40
@@ -134,6 +140,7 @@ def _process_data(subject, cond):
                 yield ['%s minimum, %s %s' % (vars_desc[varname_],
                                               context, cond),
                        unit_, range_, type_, data[varname].min()]
+
             # maximum during contact phase
             if extr['contact_max']:
                 xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
@@ -144,13 +151,27 @@ def _process_data(subject, cond):
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
 
+            # minimum during swing phase
+            if extr['swing_min']:
+                xind = scipy.signal.argrelextrema(data[varname], np.less)[0]
+                xind_contact = xind[np.where(xind >= 60)]
+                cpm = (data[varname][xind_contact].min() if
+                       len(xind_contact) > 0 else '')
+                minx = xind_contact[np.argmin(data[varname][xind_contact])]
+                yield ['%s min. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+                yield ['%s timing of min. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       '%', range_, type_, minx]
+
 
 def get_results(subjects):
 
     logger.debug('starting curve analysis')
     results = dict()
     for j, subject in enumerate(subjects):
-        for cond in ['normal', 'cognitive']:
+        for cond in ['normal']:
             for r in _process_data(subject, cond):
                 var = r[0]
                 if var not in results:
