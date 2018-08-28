@@ -141,7 +141,7 @@ def _process_data(subject, cond):
                                               context, cond),
                        unit_, range_, type_, data[varname].min()]
 
-            # maximum during contact phase
+            # maximum (peaks only) during contact phase
             if extr['contact_max']:
                 xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
                 xind_contact = xind[np.where(xind < 60)]
@@ -151,7 +151,7 @@ def _process_data(subject, cond):
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
 
-            # minimum during swing phase
+            # minimum (peaks only) during swing phase
             if extr['swing_min']:
                 xind = scipy.signal.argrelextrema(data[varname], np.less)[0]
                 xind_contact = xind[np.where(xind >= 60)]
@@ -164,6 +164,22 @@ def _process_data(subject, cond):
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
                 yield ['%s timing of min. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       '%', range_, type_, minx]
+
+            # maximum during swing phase
+            if extr['swing_max']:
+                xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
+                xind_contact = xind[np.where(xind >= 60)]
+                if len(xind_contact) > 0:
+                    cpm = data[varname][xind_contact].max()
+                    minx = xind_contact[np.argmax(data[varname][xind_contact])]
+                else:
+                    cpm, minx = '', ''
+                yield ['%s max. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+                yield ['%s timing of max. during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        '%', range_, type_, minx]
 

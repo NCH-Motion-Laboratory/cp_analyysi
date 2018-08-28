@@ -42,14 +42,14 @@ logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 
 subjects = sorted(list(set(get_subjects()) - set(subjects_exclude)))
 # or specify a list
-subjects = ['DP03', 'DP05', 'DP07', 'DP10']
+subjects = ['DP03', 'DP05', 'DP07', 'DP09', 'DP10']
 
 results_all = dict()
 results_curves = cp_stats_from_curves.get_results(subjects)
-results_params = cp_walk_parameters.get_results(subjects)
+#results_params = cp_walk_parameters.get_results(subjects)
 
 results_all.update(results_curves)
-results_all.update(results_params)
+#results_all.update(results_params)
 
 write_workbook([['']*4 + subjects] + sorted(results_all.values()),
                xls_filename)
