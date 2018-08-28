@@ -155,9 +155,11 @@ def _process_data(subject, cond):
             if extr['swing_min']:
                 xind = scipy.signal.argrelextrema(data[varname], np.less)[0]
                 xind_contact = xind[np.where(xind >= 60)]
-                cpm = (data[varname][xind_contact].min() if
-                       len(xind_contact) > 0 else '')
-                minx = xind_contact[np.argmin(data[varname][xind_contact])]
+                if len(xind_contact) > 0:
+                    cpm = data[varname][xind_contact].min()
+                    minx = xind_contact[np.argmin(data[varname][xind_contact])]
+                else:
+                    cpm, minx = '', ''
                 yield ['%s min. during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
