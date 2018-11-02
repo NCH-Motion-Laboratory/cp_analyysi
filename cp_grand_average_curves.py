@@ -20,6 +20,7 @@ import numpy as np
 import sys
 import os
 import os.path as op
+import logging
 
 from cp_common import get_files
 
@@ -29,10 +30,6 @@ def _do_average(subjects, side):
     if not isinstance(subjects, list):
         subjects =  [subjects]
 
-    # parameters
-    rootdir = 'K:\\CP_projekti_kopio'
-    plotdir = "Z:\\CP_projekti_analyysit\\Piia"
-    max_files = None # limit c3d files read (for debug)
     max_dist = 25  # deg, for outlier detection
 
     # special layout
@@ -52,7 +49,7 @@ def _do_average(subjects, side):
         Nfiles = get_files(subject, 'normal')
 
         if not Nfiles:
-            raise Exception('No trials for &s' % subject)
+            raise Exception('No trials for %s' % subject)
 
         Nfiles_all.extend(Nfiles)
 
@@ -67,7 +64,6 @@ def _do_average(subjects, side):
     cfg['plot']['model_tracecolors'] = "{'R': 'blue', 'L': 'blue'}"
     pl.plot_trial(plot_model_normaldata=True, model_stddev=Ntr.stddev_data)
     #pl.plot_trial()
-
    
 """                          
     # create custom legend outside axes
@@ -101,6 +97,9 @@ def _do_average(subjects, side):
 """
 
 
-subjects = ['DP03', 'DP05', 'DP07', 'DP09', 'DP10']
-side = 'R'
-_do_average(subjects, side)
+if __name__ == '__main__':
+    
+    logging.basicConfig(level=logging.DEBUG)
+    subjects = ['DP03', 'DP05', 'DP07', 'DP09', 'DP10']
+    side = 'R'
+    _do_average(subjects, side)

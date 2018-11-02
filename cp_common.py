@@ -19,7 +19,8 @@ import shutil
 
 
 # some global parameters
-rootdir = r'K:\CP_projekti_kopio'
+rootdir = r'Z:\Userdata_Vicon_Server\CP-projekti'
+#rootdir = r'K:\CP_projekti_kopio'
 plotdir = r'Z:\CP_projekti_analyysit\Normal_vs_cognitive'
 
 # subject name globs
