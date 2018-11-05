@@ -3,19 +3,12 @@
 
 Make clinical copy of cp-project directory
 
--args:
-    subj level source dir, subj level dest dir
+Use as:
     
--find session dir
--create subj dest dir (if needed)
--create session dest dir
--copy files
--renames
--fix enf files
-   
+    python cp_make_clinical_copy.py "D:\ViconData\Clinical\dp11" "C:\Temp"
+    --subj_code D0024_TH --subj_name Tuure
 
-
-@author: Vicon123
+@author: Jussi (jnu@iki.fi)
 """
 
 import os
@@ -48,12 +41,13 @@ def _find_trials(sessionpath):
 
   
 def _fix_static_subjname(c3dfile, new_name):
+    """Fix subject name in static trials"""
     reader = btk.btkAcquisitionFileReader()
     reader.SetFilename(c3dfile)
     reader.Update()
     acq = reader.GetOutput()
     meta = acq.GetMetaData()
-    newmetainfo = btk.btkMetaDataInfo(new_name.ljust(32))
+    newmetainfo = btk.btkMetaDataInfo((new_name.ljust(32),))
     meta.GetChild('SUBJECTS').GetChild('NAMES').SetInfo(newmetainfo)
     acq.SetMetaData(meta)
     acq.Update()
@@ -158,14 +152,15 @@ def make_clinical_copy(subjdir, dest_root, subj_code, subj_name, meas_type):
             basename = gaitutils.sessionutils._enf2other(f_trial, '')
             glob_ = op.join(sessiondir_full, basename+'*')
             trial_files_all = glob.glob(glob_)
-            trial_files_all = [tr for tr in trial_files_all
-                               if op.splitext(tr)[-1].lower() != '.c3d']
             for f in trial_files_all:
+                """ We want to write new filename + old extension, but some
+                files need special treatment (e.g. need to preserve camera
+                number for avi files) """
                 ext = op.splitext(f)[-1]
                 if ext == '.enf':
-                    ext = '.Trial.enf'  # "extension" for trial enfs
+                    ext = '.Trial.enf'
                 if ext == '.avi':
-                    ext = f[f.find('.'):]  
+                    ext = f[f.find('.'):]  # FIXME: bit hackish  
                 nstr = str(n).zfill(2)
                 target_file = '%s%s%s' % (sessiondir_dest_, nstr, ext)
                 logger.debug(target_file)
@@ -180,7 +175,16 @@ def make_clinical_copy(subjdir, dest_root, subj_code, subj_name, meas_type):
             di = {'SUBJECTS': subj_name}
             gaitutils.eclipse.set_eclipse_keys(f_full, di,
                                                update_existing=True)
-            
+
+        # fix static 
+        static_c3ds = gaitutils.sessionutils.find_tagged(sessiondir_dest,
+                                                         ['Static'], ['TYPE'])
+        for c3dfile in static_c3ds:
+            _fix_static_subjname(c3dfile, subj_name)
+
+        
+        
+        
         
 if __name__ == '__main__':
 
