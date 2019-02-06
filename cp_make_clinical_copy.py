@@ -22,22 +22,22 @@ import btk
 
 from cp_common import _glob_all
 import gaitutils
+from gaitutils import sessionutils
 
 logger = logging.getLogger(__name__)
 
 
 
 def _find_trials(sessionpath):
-    """Return base names for session trials (without extension)"""
-    enfs_ = gaitutils.sessionutils.get_session_enfs(sessionpath)
-    enfs = [op.split(enf)[-1] for enf in enfs_]
-    enfs_ok = [enf for enf in enfs if re.search('\.*N(\d*)\.*', enf)]
-    if enfs_ok:
-        enfs_static = [enf for enf in enfs_ if gaitutils.sessionutils.
-                       get_eclipse_keys(enf)['TYPE'].lower() == 'static']
-        return enfs_static + enfs_ok
-    else:
-        return enfs  # if no match for normal trials, return all
+    """Return enf names for session trials"""
+    enfs_ = list(sessionutils.get_session_enfs(sessionpath))
+    enfs_dyn = sessionutils._filter_by_type(enfs_, 'dynamic')
+    enfs_static = sessionutils._filter_by_type(enfs_, 'static')
+    enfs_dyn = [op.split(enf)[-1] for enf in enfs_dyn]  # strip path
+    enfs_static = [op.split(enf)[-1] for enf in enfs_static]  # strip path
+    enfs_ok = [enf for enf in enfs_dyn if re.search('\.*N(\d*)\.*', enf)]
+    enfs_dyn_ok = enfs_ok or enfs_dyn
+    return enfs_dyn_ok + enfs_static
 
   
 def _fix_static_subjname(c3dfile, new_name):
@@ -181,10 +181,7 @@ def make_clinical_copy(subjdir, dest_root, subj_code, subj_name, meas_type):
         for c3dfile in static_c3ds:
             _fix_static_subjname(c3dfile, subj_name)
 
-        
-        
-        
-        
+
 if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
@@ -197,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--meas_type', type=str)
 
     args = parser.parse_args()
-    
+
     make_clinical_copy(args.subjdir, args.destdir, args.subj_code,
                        args.subj_name, args.meas_type)
     
