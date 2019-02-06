@@ -58,12 +58,12 @@ def _fix_static_subjname(c3dfile, new_name):
     
 
 def make_clinical_copy(subjdir, dest_root, subj_code, subj_name, meas_type):
-    """ destdir is destination root dir (subject will appear under it) """
+    """ destdir is destination root dir (=subject will appear under it) """
 
     subj_orig = op.split(subjdir)[-1].lower()
     logger.debug('original subject %s' % subj_orig)
     
-    extra_codes = ['tuet', 'paljal']
+    extra_codes = ['tuet', 'paljal', 'tuet_pohjallinen', 'tuet_pohjalliset']
     
     if not op.isdir(subjdir):
         raise ValueError('Subject dir %s not found' % subjdir)
@@ -175,10 +175,9 @@ def make_clinical_copy(subjdir, dest_root, subj_code, subj_name, meas_type):
             di = {'SUBJECTS': subj_name}
             gaitutils.eclipse.set_eclipse_keys(f_full, di,
                                                update_existing=True)
-
         # fix static 
-        static_c3ds = gaitutils.sessionutils.find_tagged(sessiondir_dest,
-                                                         ['Static'], ['TYPE'])
+        static_c3ds = gaitutils.sessionutils.get_c3ds(sessiondir_dest,
+                                                      trial_type='static')
         for c3dfile in static_c3ds:
             _fix_static_subjname(c3dfile, subj_name)
 
