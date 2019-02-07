@@ -27,19 +27,25 @@ from gaitutils import sessionutils
 logger = logging.getLogger(__name__)
 
 
-
 def _find_trials(sessionpath):
-    """Return enf names for session trials"""
+    """For CP-project folders, return normal (N) trials only. For any other
+    folder, return all dynamic trials. Also return static trials"""
     enfs_ = list(sessionutils.get_session_enfs(sessionpath))
-    enfs_dyn = sessionutils._filter_by_type(enfs_, 'dynamic')
-    enfs_static = sessionutils._filter_by_type(enfs_, 'static')
-    enfs_dyn = [op.split(enf)[-1] for enf in enfs_dyn]  # strip path
-    enfs_static = [op.split(enf)[-1] for enf in enfs_static]  # strip path
-    enfs_ok = [enf for enf in enfs_dyn if re.search('\.*N(\d*)\.*', enf)]
-    enfs_dyn_ok = enfs_ok or enfs_dyn
-    return enfs_dyn_ok + enfs_static
+    enfs_dyn = list(sessionutils._filter_by_type(enfs_, 'dynamic'))
+    enfs_static = list(sessionutils._filter_by_type(enfs_, 'static'))
+    # look for normal trials (N followed by n digits)
+    enfs_normal = [enf for enf in enfs_dyn if re.search('\.*N(\d*)\.*', enf)]
+    ecl_keys = ['DESCRIPTION', 'NOTES']
+    enfs_standing = sessionutils._filter_by_eclipse_keys(enfs_dyn, 'standing', ecl_keys)
+    enfs_unipedal = sessionutils._filter_by_eclipse_keys(enfs_dyn, 'unipedal', ecl_keys)
+    if not enfs_normal:
+        enfs_ret = enfs_dyn + enfs_static
+    else:
+        enfs_ret = (enfs_normal + enfs_static + list(enfs_standing) +
+                    list(enfs_unipedal))
+    return [op.split(enf)[-1] for enf in enfs_ret]  # strip path
 
-  
+
 def _fix_static_subjname(c3dfile, new_name):
     """Fix subject name in static trials"""
     reader = btk.btkAcquisitionFileReader()
