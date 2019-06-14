@@ -15,16 +15,25 @@ import os.path as op
 from openpyxl import Workbook
 from time import localtime, strftime
 import logging
-import shutil
+import json
+
+logger = logging.getLogger(__name__)
 
 
-# some global parameters
-rootdir = r'Z:\Userdata_Vicon_Server\CP-projekti'
-#rootdir = r'K:\CP_projekti_kopio'
-plotdir = r'Z:\CP_projekti_analyysit\Normal_vs_cognitive'
+# read cp_analysis.json from home dir
+homedir = op.expanduser('~')
+cfg_json = op.join(homedir, 'cp_analysis.json')
+if not op.isfile(cfg_json):
+    raise ValueError('must create config file %s' % cfg_json)
+with open(cfg_json, 'rb') as f:
+    params = json.load(f)
+rootdir = params['rootdir']
+plotdir = params['plotdir']
+subj_globs_ = params['subj_globs']
 
-# subject name globs
-subj_globs_ = ['TD*', 'HP*', 'DP*']
+if not op.isdir(rootdir):
+    raise ValueError('configured root dir %s does not exist')
+
 
 # globs for each trial type
 globs = dict()
@@ -36,18 +45,18 @@ globs['tray'] = ['*T?_*']  # globs for tray trials
 files_exclude = ['stance', 'one', 'foam', 'hop', 'stand', 'balance',
                  'toes', 'toget', 'loitonnus', 'abduction']
 
-logger = logging.getLogger(__name__)
-
 
 def _glob_all(globs, prefix=None, postfix=None):
-    """Glob from a list, adding prefix dir"""
+    """Glob from a list, adding prefix (maybe a directory)"""
+    if not isinstance(globs, list):
+        globs = [globs]
     files = list()
     for g in globs:
         glob_ = op.join(prefix, g) if prefix else g
         glob_ += postfix if postfix is not None else ''
         files.extend(glob.glob(glob_))
     return files
-        
+
 
 def get_timestr():
     """ Get a second-resolution timestr (current time) that can be put into
@@ -66,7 +75,6 @@ def get_subjects():
     # randomize order for debug purposes
     shuffle(subjects)
     return subjects
-
 
 
 def get_files(subject, types, ext='.c3d'):
@@ -89,7 +97,7 @@ def get_files(subject, types, ext='.c3d'):
     subjdir = op.join(rootdir, subject)
     if not op.isdir(subjdir):
         logger.warning('Subject directory not found: %s' % subjdir)
-        return []
+        return list()
 
     datadirs = [file for file in os.listdir(subjdir) if
                 op.isdir(op.join(subjdir, file))]
@@ -97,35 +105,25 @@ def get_files(subject, types, ext='.c3d'):
     for datadir in datadirs:
 
         logger.debug('trying data dir %s/%s' % (subject, datadir))
-        # FIXME: use glob_all
-        files = list()
-        for glob_ in globs_:
-            glob_ += ext
-            glob_full = op.join(subjdir, datadir, glob_)
-            files.extend(glob.glob(glob_full))
+        prefix = op.join(subjdir, datadir)
+        files = _glob_all(globs_, prefix=prefix, postfix='c3d')
 
         files_exc = [it for it in files if any([exc.lower() in it.lower()
                      for exc in files_exclude])]
-
         files = list(set(files) - set(files_exc))
+        logger.debug('excluding: %s' % files_exc)
 
-        # does it look like a proper datadir?
         if len(files) < 10:
             logger.debug('%s is probably not a CP data dir' % datadir)
             continue
 
         logger.debug('subject %s, %s trials: found %d files:'
                      % (subject, '/'.join(types), len(files)))
-        for fn in files:
-            logger.debug(fn)
-        if files_exc:
-            logger.debug('excluded files:')
-            for fn in files_exc:
-                logger.debug(fn)
+
         return files
 
     logger.warning('no files found for %s' % subject)
-    return []
+    return list()
 
 
 def write_workbook(results, filename, first_col=1, first_row=1):
