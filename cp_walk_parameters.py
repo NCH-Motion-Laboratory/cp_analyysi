@@ -10,7 +10,7 @@ from __future__ import print_function
 import numpy as np
 import logging
 
-from gaitutils import c3d
+from gaitutils import analysis
 from cp_common import get_files
 
 
@@ -79,7 +79,6 @@ def _process_data(datas, vars, cond):
                     else:
                         logger.debug('data is None for %s: %s in file %s' %
                                      (var, context, f))
-
     # these are common to all vars
     range_ = ''
     type_ = 1
@@ -96,11 +95,13 @@ def _process_data(datas, vars, cond):
 
 
 def get_results(subjects):
+    if not isinstance(subjects, list):
+        subjects = [subjects]
     logger.debug('starting time-distance analysis')
     results = dict()
     for j, subject in enumerate(subjects):
         logger.debug('processing subject %s' % subject)
-        for cond in ['normal', 'cognitive']:
+        for cond in ['normal']:
             datas = _read_data(subject, vars, cond)
             for r in _process_data(datas, vars, cond):
                 var = r[0]
@@ -110,3 +111,21 @@ def get_results(subjects):
                     results[var].append(r[-1])
     logger.debug('time-distance analysis finished')
     return results
+
+
+def get_average(subjects):
+    """Get averaged timedist for normal condition"""
+    if not isinstance(subjects, list):
+        subjects = [subjects]
+    logger.debug('starting time-distance analysis')
+    ans = list()
+    for j, subject in enumerate(subjects):
+        logger.debug('processing subject %s' % subject)
+        Nfiles = get_files(subject, 'normal')
+        ans.extend([analysis.get_analysis(c3dfile) for c3dfile in Nfiles])
+    return analysis.group_analysis(ans)
+    
+    
+    
+
+

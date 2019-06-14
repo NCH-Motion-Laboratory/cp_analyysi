@@ -34,7 +34,6 @@ subj_globs_ = params['subj_globs']
 if not op.isdir(rootdir):
     raise ValueError('configured root dir %s does not exist')
 
-
 # globs for each trial type
 globs = dict()
 globs['cognitive'] = ['*C?_*', '*K?_*']  # globs for cognitive trials
