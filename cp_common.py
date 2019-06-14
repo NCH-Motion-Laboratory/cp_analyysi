@@ -63,7 +63,7 @@ def get_timestr():
 def get_subjects():
     """ Get list of all subject names, e.g. 'TD01' """
     subjects = list()
-    for glob_ in params['subj_globs_']:
+    for glob_ in params['subj_globs']:
         glob_full = op.join(params['rootdir'], glob_)
         subjects.extend(glob.glob(glob_full))
     # strip paths for get_files()
