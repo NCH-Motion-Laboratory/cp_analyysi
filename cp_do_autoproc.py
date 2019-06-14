@@ -13,8 +13,7 @@ import os.path as op
 import gaitutils
 from gaitutils.autoprocess import _do_autoproc
 from gaitutils import cfg, nexus, configdot
-from cp_common import get_files, get_subjects, get_timestr, homedir
-from cp_common import logdir, autoproc_subjects, autoproc_types
+from cp_common import get_files, get_subjects, get_timestr, homedir, params
 
 
 def _start_nexus():
@@ -36,18 +35,20 @@ def _kill_nexus(p):
 
 # logfile - None for stdout logging
 logfilename = 'cp_autoprocess_log_%s.txt' % get_timestr()
-logfile = op.join(logdir, logfilename)
+logfile = op.join(params['logdir'], logfilename)
 
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
 
 # use the special config for CP project
-cfg_file = op.join(homedir, '.gaitutils_cp_projekti.cfg')
+cfg_file = params['autoproc_config']
 cfg_cp = configdot.parse_config(cfg_file)
 configdot.update_config(cfg, cfg_cp)
 
-if not autoproc_subjects:
+if not params['autoproc_subjects']:
     autoproc_subjects = get_subjects()
+else:
+    autoproc_subjects = params['autoproc_subjects']
 
 logging.debug('start global autoproc for %d subjects:' % len(autoproc_subjects))
 logging.debug('%s' % autoproc_subjects)
@@ -65,7 +66,7 @@ for subject in autoproc_subjects:
     # need to open trial to get Nexus to switch sessions
     vi.OpenTrial(trial_, 60)
     try:
-        enffiles = get_files(subject, autoproc_types, ext='.Trial.enf')
+        enffiles = get_files(subject, params['autoproc_types'], ext='.Trial.enf')
         _do_autoproc(enffiles, pipelines_in_proc=False)
     except gaitutils.GaitDataError:
         logging.warning('autoproc error for %s, skipping' % subject)

@@ -27,14 +27,8 @@ if not op.isfile(cfg_json):
     raise ValueError('must create config file %s' % cfg_json)
 with open(cfg_json, 'rb') as f:
     params = json.load(f)
-rootdir = params['rootdir']
-plotdir = params['plotdir']
-logdir = params['logdir']
-autoproc_types = params['autoproc_types']
-autoproc_subjects = params['autoproc_subjects']
-subj_globs_ = params['subj_globs']
 
-if not op.isdir(rootdir):
+if not op.isdir(params['rootdir']):
     raise ValueError('configured root dir %s does not exist')
 
 # globs for each trial type
@@ -69,8 +63,8 @@ def get_timestr():
 def get_subjects():
     """ Get list of all subject names, e.g. 'TD01' """
     subjects = list()
-    for glob_ in subj_globs_:
-        glob_full = op.join(rootdir, glob_)
+    for glob_ in params['subj_globs_']:
+        glob_full = op.join(params['rootdir'], glob_)
         subjects.extend(glob.glob(glob_full))
     # strip paths for get_files()
     subjects = [op.split(subj)[-1] for subj in subjects]
@@ -96,7 +90,7 @@ def get_files(subject, types, ext='c3d'):
 
     logger.debug('finding trial files for %s' % subject)
     # try to auto find data dirs under subject dir
-    subjdir = op.join(rootdir, subject)
+    subjdir = op.join(params['rootdir'], subject)
     if not op.isdir(subjdir):
         logger.warning('Subject directory not found: %s' % subjdir)
         return list()
