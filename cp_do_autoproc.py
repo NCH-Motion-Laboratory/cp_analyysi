@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Autoprocess all CP subjects
+Autoprocess CP subjects
 
 @author: Jussi (jnu@iki.fi)
 """
@@ -12,8 +12,9 @@ import os.path as op
 
 import gaitutils
 from gaitutils.autoprocess import _do_autoproc
-from gaitutils import cfg, nexus
-from cp_common import get_files, get_subjects, get_timestr, logdir
+from gaitutils import cfg, nexus, configdot
+from cp_common import get_files, get_subjects, get_timestr, homedir
+from cp_common import logdir, autoproc_subjects, autoproc_types
 
 
 def _start_nexus():
@@ -33,9 +34,6 @@ def _kill_nexus(p):
     time.sleep(5)
 
 
-# trial types to process
-trial_types = ['normal', 'cognitive']
-
 # logfile - None for stdout logging
 logfilename = 'cp_autoprocess_log_%s.txt' % get_timestr()
 logfile = op.join(logdir, logfilename)
@@ -44,17 +42,18 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
 
 # use the special config for CP project
-#cfg_file = 'c:/Users/Vicon123/.gaitutils_cp_projekti.cfg'
-#cfg.read(cfg_file)
+cfg_file = op.join(homedir, '.gaitutils_cp_projekti.cfg')
+cfg_cp = configdot.parse_config(cfg_file)
+configdot.update_config(cfg, cfg_cp)
 
-subjects = get_subjects()
-subjects = ['TD3']
+if not autoproc_subjects:
+    autoproc_subjects = get_subjects()
 
-logging.debug('start global autoproc for %d subjects:' % len(subjects))
-logging.debug('%s' % subjects)
+logging.debug('start global autoproc for %d subjects:' % len(autoproc_subjects))
+logging.debug('%s' % autoproc_subjects)
 
 # run autoproc for each subject
-for subject in subjects:
+for subject in autoproc_subjects:
     #p = _start_nexus()
     vi = gaitutils.nexus.viconnexus()
     # look for x1d instead of c3d (c3d files may not exist yet)
@@ -66,8 +65,8 @@ for subject in subjects:
     # need to open trial to get Nexus to switch sessions
     vi.OpenTrial(trial_, 60)
     try:
-        enffiles = get_files(subject, trial_types, ext='.Trial.enf')
-        _do_autoproc(enffiles)
+        enffiles = get_files(subject, autoproc_types, ext='.Trial.enf')
+        _do_autoproc(enffiles, pipelines_in_proc=False)
     except gaitutils.GaitDataError:
         logging.warning('autoproc error for %s, skipping' % subject)
     #_kill_nexus(p)

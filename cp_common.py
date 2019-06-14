@@ -30,6 +30,8 @@ with open(cfg_json, 'rb') as f:
 rootdir = params['rootdir']
 plotdir = params['plotdir']
 logdir = params['logdir']
+autoproc_types = params['autoproc_types']
+autoproc_subjects = params['autoproc_subjects']
 subj_globs_ = params['subj_globs']
 
 if not op.isdir(rootdir):
