@@ -29,6 +29,7 @@ with open(cfg_json, 'rb') as f:
     params = json.load(f)
 rootdir = params['rootdir']
 plotdir = params['plotdir']
+logdir = params['logdir']
 subj_globs_ = params['subj_globs']
 
 if not op.isdir(rootdir):
@@ -76,7 +77,7 @@ def get_subjects():
     return subjects
 
 
-def get_files(subject, types, ext='.c3d'):
+def get_files(subject, types, ext='c3d'):
     """ Get trial files according to given subject and trial type
     (e.g. 'normal') and file extension """
 
@@ -105,7 +106,7 @@ def get_files(subject, types, ext='.c3d'):
 
         logger.debug('trying data dir %s/%s' % (subject, datadir))
         prefix = op.join(subjdir, datadir)
-        files = _glob_all(globs_, prefix=prefix, postfix='c3d')
+        files = _glob_all(globs_, prefix=prefix, postfix=ext)
 
         files_exc = [it for it in files if any([exc.lower() in it.lower()
                      for exc in files_exclude])]
