@@ -10,7 +10,7 @@ from __future__ import print_function
 import numpy as np
 import logging
 
-from gaitutils import analysis
+from gaitutils import analysis, c3d
 from cp_common import get_files
 
 

@@ -20,7 +20,7 @@ import json
 logger = logging.getLogger(__name__)
 
 
-# read cp_analysis.json from home dir
+# read configuration JSON file from home dir
 homedir = op.expanduser('~')
 cfg_json = op.join(homedir, 'cp_analysis.json')
 if not op.isfile(cfg_json):
