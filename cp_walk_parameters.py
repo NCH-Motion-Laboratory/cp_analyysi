@@ -113,8 +113,9 @@ def get_results(subjects):
     return results
 
 
-def get_average(subjects):
-    """Get averaged timedist for normal condition"""
+def get_timedist_average(subjects):
+    """Get grand average timedist for subjects (normal trials only).
+    Returns tuple of timedist (mean, std)"""
     if not isinstance(subjects, list):
         subjects = [subjects]
     logger.debug('starting time-distance analysis')
@@ -123,9 +124,6 @@ def get_average(subjects):
         logger.debug('processing subject %s' % subject)
         Nfiles = get_files(subject, 'normal')
         ans.extend([analysis.get_analysis(c3dfile) for c3dfile in Nfiles])
-    return analysis.group_analysis(ans)
+    return analysis.group_analysis(ans), analysis.group_analysis(ans, fun=np.std)
     
     
-    
-
-
