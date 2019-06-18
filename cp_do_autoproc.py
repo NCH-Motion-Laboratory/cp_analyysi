@@ -15,10 +15,12 @@ from gaitutils.autoprocess import _do_autoproc
 from gaitutils import cfg, nexus, configdot
 from cp_common import get_files, get_subjects, get_timestr, homedir, params
 
+logger = logging.getLogger(__name__)
+
 
 def _start_nexus():
     """Start Vicon Nexus"""
-    logging.debug('starting Nexus')
+    logger.debug('starting Nexus')
     
     exe = op.join(nexus._find_nexus_path(), 'Nexus.exe')
     p = subprocess.Popen([exe])
@@ -28,7 +30,7 @@ def _start_nexus():
 
 def _kill_nexus(p):
     """Kill Vicon Nexus process p"""
-    logging.debug('terminating Nexus')
+    logger.debug('terminating Nexus')
     p.terminate()
     time.sleep(5)
 
@@ -36,7 +38,6 @@ def _kill_nexus(p):
 # logfile - None for stdout logging
 logfilename = 'cp_autoprocess_log_%s.txt' % get_timestr()
 logfile = op.join(params['logdir'], logfilename)
-
 logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format='%(asctime)s %(funcName)s: %(message)s')
 
@@ -50,17 +51,17 @@ if not params['autoproc_subjects']:
 else:
     autoproc_subjects = params['autoproc_subjects']
 
-logging.debug('start global autoproc for %d subjects:' % len(autoproc_subjects))
-logging.debug('%s' % autoproc_subjects)
+logger.debug('start global autoproc for %d subjects:' % len(autoproc_subjects))
+logger.debug('%s' % autoproc_subjects)
 
 # run autoproc for each subject
 for subject in autoproc_subjects:
-    #p = _start_nexus()
+    p = _start_nexus()
     vi = gaitutils.nexus.viconnexus()
     # look for x1d instead of c3d (c3d files may not exist yet)
     trials_ = get_files(subject, 'normal', ext='.x1d')
     if not trials_:
-        logging.warning('no files for %s, skipping' % subject)
+        logger.warning('no files for %s, skipping' % subject)
         continue
     trial_ = op.splitext(trials_[0])[0]
     # need to open trial to get Nexus to switch sessions
@@ -69,8 +70,8 @@ for subject in autoproc_subjects:
         enffiles = get_files(subject, params['autoproc_types'], ext='.Trial.enf')
         _do_autoproc(enffiles, pipelines_in_proc=False)
     except gaitutils.GaitDataError:
-        logging.warning('autoproc error for %s, skipping' % subject)
-    #_kill_nexus(p)
+        logger.warning('autoproc error for %s, skipping' % subject)
+    _kill_nexus(p)
 
-logging.debug('global autoproc finished')
+logger.debug('global autoproc finished')
 print 'done'
