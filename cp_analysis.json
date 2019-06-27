@@ -1,3 +1,3 @@
 {"rootdir": "D:\\CP_project_TDonly", "plotdir": "D:\\CP_project_TDonly", "logdir": "D:\\CP_project_TDonly", "subj_globs": ["TD*"],
-"autoproc_subjects": [], "autoproc_types": ["normal"], "autoproc_config": "C:\\Users\\vicon123\\.gaitutils_cp_projekti.cfg"¨,
+"autoproc_subjects": ["TD3", "TD17", "TD22", "TD28", "TD02", "TD35", "TD26", "TD32", "TD23", "TD21", "TD07", "TD09", "TD25", "TD11", "TD08", "TD10", "TD01", "TD37", "TD04", "TD77", "TD34"], "autoproc_types": ["normal"], "autoproc_config": "C:\\Users\\vicon123\\.gaitutils_cp_projekti.cfg"¨,
 "analysis_subjects": ["TD22", "TD23"]}

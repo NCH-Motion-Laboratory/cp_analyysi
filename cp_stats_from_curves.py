@@ -47,9 +47,9 @@ import scipy
 import time
 import logging
 
-from cp_common import get_files, write_workbook
+from cp_common import get_files, write_workbook, params
 import gaitutils
-from gaitutils import cfg
+from gaitutils import cfg, stats
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +98,7 @@ def _process_data(subject, cond):
 
     # get list of files and average
     files = get_files(subject, cond)
-    avgdata, stddata, N_ok, _ = gaitutils.stats.average_trials(files,
-                                                               max_dist=max_dist)
+    avgdata, stddata, N_ok, _ = stats.average_trials(files, max_dist=max_dist)
     if avgdata is None:
         logger.warning('no data for %s / %s, terminating' % (subject, cond))
         raise ValueError('no data for %s / %s' % (subject, cond))
@@ -189,7 +188,7 @@ def get_results(subjects):
     logger.debug('starting curve analysis')
     results = dict()
     for j, subject in enumerate(subjects):
-        for cond in ['normal']:
+        for cond in params['analysis_types']:
             for r in _process_data(subject, cond):
                 var = r[0]
                 if var not in results:

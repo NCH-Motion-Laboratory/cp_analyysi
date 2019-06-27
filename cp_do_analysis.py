@@ -42,6 +42,8 @@ logging.getLogger('gaitutils.c3d').setLevel(logging.WARNING)
 logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 
 subjects = params['analysis_subjects']
+if not subjects:
+    subjects = get_subjects()
 
 results_all = dict()
 results_curves = cp_stats_from_curves.get_results(subjects)

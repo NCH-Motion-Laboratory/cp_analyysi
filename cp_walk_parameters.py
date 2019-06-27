@@ -11,7 +11,7 @@ import numpy as np
 import logging
 
 from gaitutils import analysis, c3d
-from cp_common import get_files
+from cp_common import get_files, params
 
 
 logger = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ def get_results(subjects):
     results = dict()
     for j, subject in enumerate(subjects):
         logger.debug('processing subject %s' % subject)
-        for cond in ['normal']:
+        for cond in params['analysis_types']:
             datas = _read_data(subject, vars, cond)
             for r in _process_data(datas, vars, cond):
                 var = r[0]
