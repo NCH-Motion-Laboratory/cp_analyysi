@@ -29,7 +29,7 @@ with open(cfg_json, 'rb') as f:
     params = json.load(f)
 
 if not op.isdir(params['rootdir']):
-    raise ValueError('configured root dir %s does not exist')
+    raise ValueError('configured root dir %s does not exist' % params['rootdir'])
 
 # globs for each trial type
 globs = dict()

@@ -25,25 +25,39 @@ def get_timedist_average(subjects):
         Nfiles = get_files(subject, 'normal')
         ans.extend([analysis.get_analysis(c3dfile) for c3dfile in Nfiles])
     return analysis.group_analysis(ans), analysis.group_analysis(ans, fun=np.std)
-    
+
 
 def get_model_average(subjects):
+    """Get all model data curves"""
+    files = list()
+    for subject in subjects:
+        logger.info('processing subject %s' % subject)
+        files.extend(get_files(subject, 'normal'))
+    avgdata, stddata, N_ok, _ = stats.average_trials(files, max_dist=None)
+    avgdata = stats.AvgTrial(files)
+    return avgdata
+
+
+def get_model_data(subjects):
     """Average gait model data for subjects"""
     files = list()
     for subject in subjects:
         logger.info('processing subject %s' % subject)
         files.extend(get_files(subject, 'normal'))
-    #avgdata, stddata, N_ok, _ = stats.average_trials(files, max_dist=None)
-    avgdata = stats.AvgTrial(files)
-    return avgdata
+    data, nc = stats._collect_model_data(files, fp_cycles_only=False)
+    return data, nc
 
 
-logging.basicConfig(level=logging.INFO)
-subjects = params['analysis_subjects']
-avgdata = get_model_average(subjects)
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    subjects = params['analysis_subjects']
+    # get and overlay model data
+    data, nc = get_model_data(subjects)
 
-layout = layouts.get_layout('lb_kin')
-fig = viz.plot_plotly.plot_trials(avgdata, layout)
-#, model_normaldata={})
-viz.plot_misc.show_fig(fig)
+    # plot averaged data
+    #avgdata = get_model_average(subjects)
+    #layout = layouts.get_layout('lb_kin')
+    #fig = viz.plot_plotly.plot_trials(avgdata, layout)
+    #, model_normaldata={})
+    #viz.plot_misc.show_fig(fig)
 
