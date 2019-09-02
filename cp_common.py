@@ -66,6 +66,8 @@ def get_subjects():
     for glob_ in params['subj_globs']:
         glob_full = op.join(params['rootdir'], glob_)
         subjects.extend(glob.glob(glob_full))
+    # include dirs only
+    subjects = [s for s in subjects if op.isdir(s)]
     # strip paths for get_files()
     subjects = [op.split(subj)[-1] for subj in subjects]
     # randomize order for debug purposes
