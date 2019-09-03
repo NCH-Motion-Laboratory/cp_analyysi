@@ -9,6 +9,7 @@ from __future__ import print_function
 import numpy as np
 import os.path as op
 import logging
+import datetime
 
 from gaitutils import analysis, c3d, stats, viz, layouts, normaldata, models
 from cp_common import get_files, params, get_subjects
@@ -25,7 +26,8 @@ def get_timedist_average(subjects):
         logger.info('processing subject %s' % subject)
         Nfiles = get_files(subject, 'normal')
         ans.extend([analysis.get_analysis(c3dfile) for c3dfile in Nfiles])
-    return analysis.group_analysis(ans), analysis.group_analysis(ans, fun=np.std)
+    return (analysis.group_analysis(ans),
+            analysis.group_analysis(ans, fun=np.std))
 
 
 def get_model_data(subjects):
@@ -36,6 +38,16 @@ def get_model_data(subjects):
         files.extend(get_files(subject, 'normal'))
     data, nc = stats._collect_model_data(files, fp_cycles_only=False)
     return data, nc
+
+
+def get_emg_data(subjects, newer_than=None):
+    """Average gait model data for subjects"""
+    files = list()
+    for subject in subjects:
+        logger.info('processing subject %s' % subject)
+        files.extend(get_files(subject, 'normal', newer_than=newer_than))
+    data = stats._collect_emg_data(files, grid_points=101)
+    return data
 
 
 # ages for TD subjects
@@ -71,11 +83,13 @@ age_di = {'TD01':	13.1,
           'TD70':	16.3,
           'TD77':	16.8,
           'TD82':	13.3}
-age_cutoff = 12
+age_cutoff = None
+# sessions must be newer than this
+newer_than = datetime.datetime(2018, 3, 1)
 
 
 # compute new normal data
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
     logging.basicConfig(level=logging.INFO)
     if age_cutoff:
         subjects = get_subjects()
@@ -89,6 +103,35 @@ if __name__ == '__main__':
     fn = op.join(params['plotdir'], 'TD_normaldata_12andbelow.xlsx')
     normaldata._write_xlsx(ndata, fn)
 
+
+if __name__ == '__main__':
+    #logging.basicConfig(level=logging.INFO)
+    if age_cutoff:
+        subjects = get_subjects()
+        subjects = [x for x in subjects if age_di[x] < age_cutoff]
+    else:
+        subjects = params['analysis_subjects'] or get_subjects()
+    logger.info('subjects: %s' % subjects)
+    # get all data as numpy arrays
+    data, meta = get_emg_data(subjects, newer_than=newer_than)
+    plt.figure()
+    ch = 'RSol'
+    plt.plot(data[ch].T)
+    plt.plot(np.median(data[ch], axis=0), 'k--')
+    plt.title(ch)
+
+    emg_normals = dict()
+    chs = (x[1:] for x in data.keys())  # strip context
+    for ch_ in chs:
+        plt.figure()
+        rch, lch = 'R'+ch_, 'L'+ch_
+        emg_normals[ch] = np.median(data[rch], axis=0) + np.median(data[lch], axis=0)
+        emg_normals[ch] /= emg_normals[ch].max()
+        plt.imshow(emg_normals[ch][None, :], aspect="auto")
+        plt.colorbar()
+        plt.title(ch_)
+        plt.axis('off')
+        
 
 # comparison with old normaldata
 """        
@@ -135,10 +178,11 @@ for var in models.pig_lowerbody.varlabels_noside:
 
 # effect of age cutoff
 
-ndata_old = r"Z:\PXD_files\muscle_length_13_19.xlsx"
-ndata_new = r"Z:\PXD_files\TD_normaldata_all.xlsx"
+"""
+ndata_old = normaldata.read_normaldata(r"Z:\PXD_files\muscle_length_13_19.xlsx")
+ndata_new = normaldata.read_normaldata(r"Z:\PXD_files\TD_normaldata_all.xlsx")
 
-for var in models.musclelen:
+for var in models.musclelen.varlabels_noside:
     if var not in ndata_new:
         continue
     plt.figure()
@@ -147,6 +191,6 @@ for var in models.musclelen:
     plt.plot(ndata_new[var][:, 0], 'b--')
     plt.plot(ndata_new[var][:, 1], 'r--')
     plt.title(var)        
-        
+"""     
     
     

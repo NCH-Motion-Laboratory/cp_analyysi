@@ -16,6 +16,7 @@ from openpyxl import Workbook
 from time import localtime, strftime
 import logging
 import json
+from gaitutils import sessionutils
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ def get_subjects():
     return subjects
 
 
-def get_files(subject, types, ext='c3d'):
+def get_files(subject, types, ext='c3d', newer_than=None):
     """ Get trial files according to given subject and trial type
     (e.g. 'normal') and file extension """
 
@@ -115,12 +116,19 @@ def get_files(subject, types, ext='c3d'):
             logger.debug('%s is probably not a CP data dir' % datadir)
             continue
 
-        logger.debug('subject %s, %s trials: found %d files:'
+        logger.debug('subject %s, %s trials: found %d files'
                      % (subject, '/'.join(types), len(files)))
+
+        if newer_than is not None:
+            sessiondate = sessionutils.get_session_date(prefix)
+            logger.info('session %s timestamp %s' % (datadir, sessiondate))
+            if sessiondate < newer_than:
+                logger.info('session %s too old' % datadir)
+                continue
 
         return files
 
-    logger.warning('no files found for %s' % subject)
+    logger.info('no acceptable files found for %s' % subject)
     return list()
 
 
