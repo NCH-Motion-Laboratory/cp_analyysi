@@ -22,16 +22,22 @@ import cp_walk_parameters
 from cp_common import write_workbook, get_subjects, get_timestr, params
 
 
-# logfile - None for stdout logging
 timestr_ = get_timestr()
-logfilename = 'cp_analysis_log_%s.txt' % timestr_
-logfile = op.join(params['logdir'], logfilename)
-logging.basicConfig(filename=logfile, level=logging.DEBUG,
-                    format='%(asctime)s %(funcName)s: %(message)s')
 xls_filename_ = 'cp_analysis_%s.xlsx' % timestr_
 xls_filename = op.join(params['plotdir'], xls_filename_)
-logging.basicConfig(filename=logfile, level=logging.DEBUG,
-                    format='%(asctime)s %(funcName)s: %(message)s')
+
+# set up logging to file and stderr
+logger = logging.getLogger()
+logfilename = 'cp_analysis_log_%s.txt' % timestr_
+logfile = op.join(params['logdir'], logfilename)
+formatter = logging.Formatter('%(asctime)s %(funcName)s: %(message)s')
+filehandler = logging.FileHandler(filename=logfile)
+streamhandler = logging.StreamHandler()
+filehandler.setFormatter(formatter)
+streamhandler.setFormatter(formatter)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(filehandler)
+logger.addHandler(streamhandler)
 
 # exclude some loggers to reduce noise
 logging.getLogger('gaitutils.trial').setLevel(logging.WARNING)
@@ -44,6 +50,8 @@ logging.getLogger('gaitutils.stats').setLevel(logging.WARNING)
 subjects = params['analysis_subjects']
 if not subjects:
     subjects = get_subjects()
+
+logger.info('starting analysis for subjects: %s' % subjects)
 
 results_all = dict()
 results_curves = cp_stats_from_curves.get_results(subjects)
