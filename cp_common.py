@@ -72,7 +72,7 @@ def get_subjects():
     # strip paths for get_files()
     subjects = [op.split(subj)[-1] for subj in subjects]
     # randomize order for debug purposes
-    shuffle(subjects)
+    #shuffle(subjects)
     return subjects
 
 
@@ -91,7 +91,7 @@ def get_files(subject, types, ext='c3d', newer_than=None):
         else:
             globs_ += globs[t]
 
-    logger.debug('finding trial files for %s' % subject)
+    logger.debug('finding trial files for %s, types %s' % (subject, types))
     # try to auto find data dirs under subject dir
     subjdir = op.join(params['rootdir'], subject)
     if not op.isdir(subjdir):
@@ -100,6 +100,8 @@ def get_files(subject, types, ext='c3d', newer_than=None):
 
     datadirs = [file for file in os.listdir(subjdir) if
                 op.isdir(op.join(subjdir, file))]
+
+    logger.debug('subject data dirs: %s' % datadirs)
 
     for datadir in datadirs:
 
@@ -112,7 +114,7 @@ def get_files(subject, types, ext='c3d', newer_than=None):
         files = list(set(files) - set(files_exc))
         logger.debug('excluding: %s' % files_exc)
 
-        if len(files) < 10:
+        if not files:
             logger.debug('%s is probably not a CP data dir' % datadir)
             continue
 
