@@ -101,7 +101,7 @@ def _process_data(subject, cond):
     avgdata, stddata, N_ok, _ = stats.average_trials(files, max_dist=max_dist)
     if avgdata is None:
         logger.warning('no data for %s / %s, terminating' % (subject, cond))
-        raise ValueError('no data for %s / %s' % (subject, cond))
+        raise StopIteration
 
     logger.debug('averaging stats for %s / %s:' % (subject, cond))
     for varname_ in stats_vars:
