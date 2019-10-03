@@ -141,17 +141,38 @@ def _process_data(subject, cond):
                        unit_, range_, type_, data[varname].min()]
 
             # maximum (peaks only) during contact phase
-            if extr['contact_max']:
+            if extr['contact_max_peak']:
                 xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
                 xind_contact = xind[np.where(xind < 60)]
                 cpm = (data[varname][xind_contact].max() if
                        len(xind_contact) > 0 else '')
+                yield ['%s max. peak during contact phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+
+            # regular maximum during contact phase
+            if extr['contact_max']:
+                cpm = data[varname][:60].max()
                 yield ['%s max. during contact phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
 
+            # regular maximum during swing phase
+            if extr['swing_max']:
+                cpm = data[varname][60:].max()
+                yield ['%s max. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+
+            # regular minimum during swing phase
+            if extr['contact_max']:
+                cpm = data[varname][60:].min()
+                yield ['%s min. during swing phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+
             # minimum (peaks only) during swing phase
-            if extr['swing_min']:
+            if extr['swing_min_peak']:
                 xind = scipy.signal.argrelextrema(data[varname], np.less)[0]
                 xind_contact = xind[np.where(xind >= 60)]
                 if len(xind_contact) > 0:
@@ -159,15 +180,15 @@ def _process_data(subject, cond):
                     minx = xind_contact[np.argmin(data[varname][xind_contact])]
                 else:
                     cpm, minx = '', ''
-                yield ['%s min. during swing phase, %s %s'
+                yield ['%s min. peak during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
                 yield ['%s timing of min. during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        '%', range_, type_, minx]
 
-            # maximum during swing phase
-            if extr['swing_max']:
+            # maximum (peaks only) during swing phase
+            if extr['swing_max_peak']:
                 xind = scipy.signal.argrelextrema(data[varname], np.greater)[0]
                 xind_contact = xind[np.where(xind >= 60)]
                 if len(xind_contact) > 0:
@@ -175,10 +196,10 @@ def _process_data(subject, cond):
                     minx = xind_contact[np.argmax(data[varname][xind_contact])]
                 else:
                     cpm, minx = '', ''
-                yield ['%s max. during swing phase, %s %s'
+                yield ['%s max. peak during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
-                yield ['%s timing of max. during swing phase, %s %s'
+                yield ['%s timing of max. peak during swing phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        '%', range_, type_, minx]
 
