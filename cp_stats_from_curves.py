@@ -129,11 +129,13 @@ def _process_data(subject, cond):
                 yield ['%s at foot strike, %s %s' % (vars_desc[varname_],
                                                      context, cond),
                        unit_, range_, type_, data[varname][0]]
+
             # maximum over cycle
             if extr['max']:
                 yield ['%s maximum, %s %s' % (vars_desc[varname_],
                                               context, cond),
                        unit_, range_, type_, data[varname].max()]
+
             # minimum over cycle
             if extr['min']:
                 yield ['%s minimum, %s %s' % (vars_desc[varname_],
@@ -154,6 +156,13 @@ def _process_data(subject, cond):
             if extr['contact_max']:
                 cpm = data[varname][:60].max()
                 yield ['%s max. during contact phase, %s %s'
+                       % (vars_desc[varname_], context, cond),
+                       unit_, range_, type_, cpm]
+
+            # regular minimum during contact phase
+            if extr['contact_min']:
+                cpm = data[varname][:60].min()
+                yield ['%s min. during contact phase, %s %s'
                        % (vars_desc[varname_], context, cond),
                        unit_, range_, type_, cpm]
 
