@@ -43,6 +43,19 @@ files_exclude = ['stance', 'one', 'foam', 'hop', 'stand', 'balance',
                  'toes', 'toget', 'loitonnus', 'abduction']
 
 
+def _ipython_setup():
+    """Performs some IPython magic if we are running in IPython"""
+    try:
+        __IPYTHON__
+    except NameError:
+        return
+    from IPython import get_ipython
+    ip = get_ipython()
+    ip.magic("gui qt5")  # needed for mayavi plots
+    ip.magic("reload_ext autoreload")
+    ip.magic("autoreload 2")
+
+
 def _glob_all(globs, prefix=None, postfix=None):
     """Glob from a list, adding prefix (maybe a directory)"""
     if not isinstance(globs, list):
@@ -61,11 +74,12 @@ def get_timestr():
     return strftime("%Y_%m_%d-%H%M%S", localtime())
 
 
-def get_subjects():
+def get_subjects(rootdir=None):
     """ Get list of all subject names, e.g. 'TD01' """
+    rootdir = rootdir or params['rootdir']
     subjects = list()
     for glob_ in params['subj_globs']:
-        glob_full = op.join(params['rootdir'], glob_)
+        glob_full = op.join(rootdir, glob_)
         subjects.extend(glob.glob(glob_full))
     # include dirs only
     subjects = [s for s in subjects if op.isdir(s)]
@@ -76,9 +90,11 @@ def get_subjects():
     return subjects
 
 
-def get_files(subject, types, ext='c3d', newer_than=None):
+def get_files(subject, types, ext='c3d', newer_than=None, rootdir=None):
     """ Get trial files according to given subject and trial type
     (e.g. 'normal') and file extension """
+
+    rootdir = rootdir or params['rootdir']
 
     if not isinstance(types, list):
         types = [types]
@@ -93,7 +109,7 @@ def get_files(subject, types, ext='c3d', newer_than=None):
 
     logger.debug('finding trial files for %s, types %s' % (subject, types))
     # try to auto find data dirs under subject dir
-    subjdir = op.join(params['rootdir'], subject)
+    subjdir = op.join(rootdir, subject)
     if not op.isdir(subjdir):
         logger.warning('Subject directory not found: %s' % subjdir)
         return list()

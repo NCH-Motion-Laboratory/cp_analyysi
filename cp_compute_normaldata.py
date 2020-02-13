@@ -11,7 +11,7 @@ import os.path as op
 import logging
 import datetime
 
-from gaitutils import analysis, stats, normaldata
+from gaitutils import analysis, stats, normaldata, numutils
 from cp_common import get_files, params, get_subjects
 
 
@@ -81,7 +81,8 @@ def get_emg_data(subjects, newer_than=None):
     for subject in subjects:
         logger.info('processing subject %s' % subject)
         files.extend(get_files(subject, 'normal', newer_than=newer_than))
-    data = stats._collect_emg_data(files, grid_points=101)
+    data = stats.collect_trial_data(files, collect_types={'emg': True, 'model': False},
+                                    analog_len=1001)
     return data
 
 
@@ -102,20 +103,27 @@ def compute_model_normaldata(filename, age_cutoff=None):
 
 def compute_emg_normaldata(age_cutoff=None, newer_than=None):
     """E.g. newer_than = datetime.datetime(2018, 3, 1)"""
+
     if age_cutoff:
         subjects = get_subjects()
         subjects = [x for x in subjects if age_di[x] < age_cutoff]
     else:
         subjects = params['analysis_subjects'] or get_subjects()
     logger.info('subjects: %s' % subjects)
+
     # get all data as numpy arrays
-    data, meta = get_emg_data(subjects, newer_than=newer_than)
+    data, _ = get_emg_data(subjects, newer_than=newer_than)
+    data_emg = data['emg']
+
+    # compute RMS data for each channel
     emg_normals = dict()
-    chs = (x[1:] for x in data.keys())  # strip context
+    chs = (x[1:] for x in data_emg.keys())  # strip context
     for ch_ in chs:
         rch, lch = 'R'+ch_, 'L'+ch_
-        emg_normals[ch] = np.median(data[rch], axis=0) + np.median(data[lch], axis=0)
-        emg_normals[ch] /= emg_normals[ch].max()
+        data_rms = np.vstack((numutils.rms(data_emg[rch], win=31, axis=1),
+                             numutils.rms(data_emg[lch], win=31, axis=1)))
+        emg_normals[ch_] = np.median(data_rms, axis=0)
+        emg_normals[ch_] /= emg_normals[ch_].max()
     return emg_normals
 
 
@@ -127,6 +135,7 @@ def compute_emg_normaldata(age_cutoff=None, newer_than=None):
 
 # 1-D heat map of EMG data
 """
+import matplotlib.pyplot as plt
 for ch in emg_normals:
     plt.imshow(emg_normals[ch][None, :], aspect="auto")
     plt.colorbar()
