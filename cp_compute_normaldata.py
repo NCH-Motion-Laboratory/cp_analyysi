@@ -10,9 +10,12 @@ import numpy as np
 import os.path as op
 import logging
 import datetime
+import scipy
+import matplotlib.pyplot as plt
+
 
 from gaitutils import analysis, stats, normaldata, numutils
-from cp_common import get_files, params, get_subjects
+from cp_common import get_files, get_static_files, params, get_subjects, _ipython_setup
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +56,14 @@ age_di = {'TD01':	13.1,
           'TD82':	13.3}
 
 
+def _is_ascii(s):
+    try:
+        s.encode('ascii')
+        return True
+    except UnicodeEncodeError:
+        return False
+
+
 def get_timedist_average(subjects):
     """Get grand average timedist for subjects (normal trials only).
     Returns tuple of timedist (mean, std)"""
@@ -65,24 +76,40 @@ def get_timedist_average(subjects):
             analysis.group_analysis(ans, fun=np.std))
 
 
+def get_static_model_data(subjects):
+    """Collect static kinematic data"""
+    files = list()
+    for subject in subjects:
+        logger.info('processing subject %s' % subject)
+        files.extend(get_static_files(subject))
+    # HACK: exclude non-ascii files which cannot be read by py3-btk
+    files = [fn for fin in files if _is_ascii(fn)]
+    data, nc = stats.collect_trial_data(files,
+                                        collect_types={'emg': False, 'model': True})
+    return data, nc
+
+
 def get_model_data(subjects):
-    """Average gait model data for subjects"""
+    """Collect dynamic kinematic/kinetic data"""
     files = list()
     for subject in subjects:
         logger.info('processing subject %s' % subject)
         files.extend(get_files(subject, 'normal'))
-    data, nc = stats._collect_model_data(files, fp_cycles_only=False)
+    data, nc = stats.collect_trial_data(files,
+                                        collect_types={'emg': False, 'model': True})
     return data, nc
 
 
-def get_emg_data(subjects, newer_than=None):
-    """Average gait model data for subjects"""
+def get_emg_data(subjects, analog_len=None, newer_than=None):
+    """Collect EMG data"""
+    if analog_len is None:
+        analog_len = 1001
     files = list()
     for subject in subjects:
         logger.info('processing subject %s' % subject)
         files.extend(get_files(subject, 'normal', newer_than=newer_than))
     data = stats.collect_trial_data(files, collect_types={'emg': True, 'model': False},
-                                    analog_len=1001)
+                                    analog_len=analog_len)
     return data
 
 
@@ -101,9 +128,9 @@ def compute_model_normaldata(filename, age_cutoff=None):
     normaldata._write_xlsx(ndata, fn)
 
 
-def compute_emg_normaldata(age_cutoff=None, newer_than=None):
+def compute_emg_normaldata(analog_len=None, age_cutoff=None, newer_than=None):
     """E.g. newer_than = datetime.datetime(2018, 3, 1)"""
-
+    # filter by age
     if age_cutoff:
         subjects = get_subjects()
         subjects = [x for x in subjects if age_di[x] < age_cutoff]
@@ -115,27 +142,109 @@ def compute_emg_normaldata(age_cutoff=None, newer_than=None):
     data, _ = get_emg_data(subjects, newer_than=newer_than)
     data_emg = data['emg']
 
-    # compute RMS data for each channel
+    # compute median RMS data for each channel (L/R sides combined)
     emg_normals = dict()
     chs = (x[1:] for x in data_emg.keys())  # strip context
     for ch_ in chs:
         rch, lch = 'R'+ch_, 'L'+ch_
         data_rms = np.vstack((numutils.rms(data_emg[rch], win=31, axis=1),
                              numutils.rms(data_emg[lch], win=31, axis=1)))
+        #data_rms = stats._robust_reject_rows(data_rms, 1e-6)
         emg_normals[ch_] = np.median(data_rms, axis=0)
         emg_normals[ch_] /= emg_normals[ch_].max()
+        #emg_normals[ch_] = data_rms
     return emg_normals
 
 
-# compute new EMG normal data as dict of numpy arrays
-# eventual normal data will be dict of numpy arrays (1x101)
-# -write json serializer and dump to disk
-# -add cfg.emg.graded_normaldata or similar
-# -add support in plotters
+
+# NB: EMG data is missing for Glut, Sol
+
+# NB: below, RMS data is not normalized 
+
+# try to see the effect of old vs. new lab
+newer_than = datetime.datetime(2018, 3, 1)
+subjects = get_subjects()
+
+data_new, _ = get_emg_data(subjects, newer_than=newer_than)
+data_new_emg = data_new['emg']
+
+data, _ = get_emg_data(subjects)
+data_emg = data['emg']
+
+# compute sliding window rms for all signals separately
+data_rms = dict()
+data_new_rms = dict()
+for key in data_emg:
+    data_rms[key] = numutils.rms(data_emg[key], win=31, axis=1)
+    data_new_rms[key] = numutils.rms(data_new_emg[key], win=31, axis=1)
+
+# for each sample, take median value across all signals
+data_median = dict()
+data_new_median = dict()
+for key in data_emg:
+    data_median[key] = np.median(data_rms[key], axis=0)
+    data_new_median[key] = np.median(data_new_rms[key], axis=0)
+
+s
+
+for key in data_emg.keys():
+    plt.figure()
+    plt.plot(data_median[key], 'k')
+    plt.plot(data_new_median[key], 'b')
+    plt.title(key)
+    plt.legend(['old', 'new'])
+
+# ???
+# Rec middle peak much higher in new data?
+
+
+
+
+
+
+
+for key in data_emg:
+    plt.figure()
+    plt.plot(data_rms[key].T)
+    plt.plot(data_new_rms[key].T)
+    plt.title(key)
+
+
+
+
+
+for key in emg_normals_new:
+    plt.figure()
+    plt.plot(emg_normals[key])
+    plt.plot(emg_normals_new[key])
+    plt.title(key)
+
+
+emg_normals_ = {k: d.tolist() for k, d in emg_normals.items()}
+import json
+with open('emg_normaldata.json', 'w', encoding='utf-8') as f:
+    f.write(json.dumps(emg_normals_, ensure_ascii=False))
+
+
+
+data, _ = get_emg_data(subjects, newer_than=datetime.datetime(2018, 3, 1))
+data, _ = get_emg_data(subjects, newer_than=datetime.datetime(2018, 3, 1))
+
+data_ = data['emg']
+
+
+for key in data_:
+    plt.figure()
+    plt.plot(data_[key].T)
+    plt.title(key)
+
+
+
+
+
 
 # 1-D heat map of EMG data
 """
-import matplotlib.pyplot as plt
 for ch in emg_normals:
     plt.imshow(emg_normals[ch][None, :], aspect="auto")
     plt.colorbar()

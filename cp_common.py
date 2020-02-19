@@ -119,6 +119,7 @@ def get_files(subject, types, ext='c3d', newer_than=None, rootdir=None):
 
     logger.debug('subject data dirs: %s' % datadirs)
 
+    # try each datadir in turn (but we only return data from one per subject)
     for datadir in datadirs:
 
         logger.debug('trying data dir %s/%s' % (subject, datadir))
@@ -147,6 +148,51 @@ def get_files(subject, types, ext='c3d', newer_than=None, rootdir=None):
         return files
 
     logger.info('no acceptable files found for %s' % subject)
+    return list()
+
+
+def get_static_files(subject, newer_than=None, rootdir=None):
+    """ Get trial files according to given subject and trial type
+    (e.g. 'normal') and file extension """
+
+    rootdir = rootdir or params['rootdir']
+    logger.debug('finding static trial files for %s' % subject)
+    # try to auto find data dirs under subject dir
+    subjdir = op.join(rootdir, subject)
+    if not op.isdir(subjdir):
+        logger.warning('Subject directory not found: %s' % subjdir)
+        return list()
+
+    datadirs = [file for file in os.listdir(subjdir) if
+                op.isdir(op.join(subjdir, file))]
+
+    logger.debug('subject data dirs: %s' % datadirs)
+
+    for datadir in datadirs:
+
+        logger.debug('trying data dir %s/%s' % (subject, datadir))
+        sessiondir = op.join(subjdir, datadir)
+
+        files = sessionutils.get_c3ds(sessiondir, trial_type='static',
+                                      check_if_exists=True)
+
+        if not files:
+            logger.debug('%s is probably not a CP data dir' % datadir)
+            continue
+
+        if newer_than is not None:
+            sessiondate = sessionutils.get_session_date(sessiondir)
+            logger.info('session %s timestamp %s' % (datadir, sessiondate))
+            if sessiondate < newer_than:
+                logger.info('session %s too old' % datadir)
+                continue
+
+        logger.debug('subject %s, datadir %s, static trials: found %d files'
+                     % (subject, sessiondir, len(files)))
+        return files
+
+    # we did not hit return
+    logger.info('no acceptable static trials found for %s' % subject)
     return list()
 
 
