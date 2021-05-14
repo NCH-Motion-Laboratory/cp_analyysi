@@ -10,7 +10,7 @@ from __future__ import print_function
 import numpy as np
 import logging
 
-from gaitutils import analysis, c3d
+from gaitutils import timedist, c3d
 from cp_common import get_files, params
 
 
@@ -123,7 +123,7 @@ def get_timedist_average(subjects):
     for j, subject in enumerate(subjects):
         logger.debug('processing subject %s' % subject)
         Nfiles = get_files(subject, 'normal')
-        ans.extend([analysis.get_analysis(c3dfile) for c3dfile in Nfiles])
-    return analysis.group_analysis(ans), analysis.group_analysis(ans, fun=np.std)
+        ans.extend([c3d.get_analysis(c3dfile) for c3dfile in Nfiles])
+    return timedist.group_analysis(ans), timedist.group_analysis(ans, fun=np.std)
     
     
