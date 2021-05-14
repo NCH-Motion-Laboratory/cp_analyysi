@@ -139,7 +139,8 @@ def compute_emg_normaldata(analog_len=None, age_cutoff=None, newer_than=None):
     logger.info('subjects: %s' % subjects)
 
     # get all data as numpy arrays
-    data, _ = get_emg_data(subjects, newer_than=newer_than)
+    data, _ = get_emg_data(subjects, analog_len=analog_len,
+                           newer_than=newer_than)
     data_emg = data['emg']
 
     # compute median RMS data for each channel (L/R sides combined)
@@ -155,11 +156,16 @@ def compute_emg_normaldata(analog_len=None, age_cutoff=None, newer_than=None):
         #emg_normals[ch_] = data_rms
     return emg_normals
 
-
+foo
 
 # NB: EMG data is missing for Glut, Sol
 
 # NB: below, RMS data is not normalized 
+
+# ???
+# Why is Rec middle peak much higher in new data?
+# - apparently, lot of old data has 'quiet' Rec; reason unclear
+
 
 # try to see the effect of old vs. new lab
 newer_than = datetime.datetime(2018, 3, 1)
@@ -170,6 +176,14 @@ data_new_emg = data_new['emg']
 
 data, _ = get_emg_data(subjects)
 data_emg = data['emg']
+
+# save the arrays
+np.savez('data_emg', **data_emg)
+np.savez('data_new_emg', **data_new_emg)
+
+# load
+data_emg = dict(np.load('data_emg.npz'))
+data_new_emg = dict(np.load('data_new_emg.npz'))
 
 # compute sliding window rms for all signals separately
 data_rms = dict()
@@ -194,8 +208,6 @@ for key in data_emg.keys():
     plt.title(key)
     plt.legend(['old', 'new'])
 
-# ???
-# Rec middle peak much higher in new data?
 
 
 
@@ -220,6 +232,9 @@ for key in emg_normals_new:
     plt.title(key)
 
 
+
+# resample and save EMG normals
+emg_normals = {k: scipy.signal.resample(v, 101) for k, v in emg_normals.items()}
 emg_normals_ = {k: d.tolist() for k, d in emg_normals.items()}
 import json
 with open('emg_normaldata.json', 'w', encoding='utf-8') as f:
@@ -239,6 +254,14 @@ for key in data_:
     plt.title(key)
 
 
+
+li1 = [['a', 1], ['b', 2], ['a', 5]]
+
+li2 = [['a', 5], ['b', 2], ['c', 3]]
+
+di1 = {k: v for k, v in li1}
+di2 = {k: v for k, v in li2}
+[[k, v1+di2[k], v1, di2[k]] for k, v1 in di1.items() if k in di2]
 
 
 
