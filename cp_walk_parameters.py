@@ -7,6 +7,7 @@ read time / distance vars from c3d files
 """
 
 from __future__ import print_function
+import gaitutils
 import numpy as np
 import logging
 
@@ -17,28 +18,20 @@ from cp_common import get_files, params
 logger = logging.getLogger(__name__)
 
 # analysis vars of interest
-vars = ['Stride Time',
-        'Opposite Foot Off',
-        'Double Support',
-        'Opposite Foot Contact',
-        'Single Support',
-        'Step Length',
-        'Foot Off',
-        'Walking Speed',
-        'Stride Length',
-        'Step Time',
-        'Cadence']
-
+vars = gaitutils.report.text._timedist_vars
 
 def _read_data(subject, vars, cond):
     """ Returns a dict of parameters for each trial """
     Cfiles = get_files(subject, cond)
     # 'unknown' is the default condition name
     datas = {f: c3d.get_analysis(f)['unknown'] for f in Cfiles}
-    datas_ok = {f: data for f, data in datas.items()
-                if all([var in data for var in vars])}
-    logger.debug('%s/%s: %d files read, %d files contained data' %
-                 (subject, cond, len(datas), len(datas_ok)))
+    datas_ok = {
+        f: data for f, data in datas.items() if all([var in data for var in vars])
+    }
+    logger.debug(
+        '%s/%s: %d files read, %d files contained data'
+        % (subject, cond, len(datas), len(datas_ok))
+    )
     not_ok = set(datas.keys()) - set(datas_ok.keys())
     if not_ok:
         logger.debug('following files not ok:')
@@ -70,15 +63,17 @@ def _process_data(datas, vars, cond):
             results[var][context] = list()
             for f, data in datas.items():
                 if context not in data[var]:
-                    logger.debug('missing data for %s: %s in file %s' %
-                                 (var, context, f))
+                    logger.debug(
+                        'missing data for %s: %s in file %s' % (var, context, f)
+                    )
                 else:
                     thisdata = data[var][context]
                     if thisdata is not None:
                         results[var][context].append(thisdata)
                     else:
-                        logger.debug('data is None for %s: %s in file %s' %
-                                     (var, context, f))
+                        logger.debug(
+                            'data is None for %s: %s in file %s' % (var, context, f)
+                        )
     # these are common to all vars
     range_ = ''
     type_ = 1
@@ -88,10 +83,20 @@ def _process_data(datas, vars, cond):
             data = np.array(results[var][context])
             mean_ = data.mean()
             std_ = data.std()
-            yield ['%s mean, %s %s' % (var, context.lower(), cond),
-                   unit_, range_, type_, mean_]
-            yield ['%s stddev, %s %s' % (var, context.lower(), cond),
-                   unit_, range_, type_, std_]
+            yield [
+                '%s mean, %s %s' % (var, context.lower(), cond),
+                unit_,
+                range_,
+                type_,
+                mean_,
+            ]
+            yield [
+                '%s stddev, %s %s' % (var, context.lower(), cond),
+                unit_,
+                range_,
+                type_,
+                std_,
+            ]
 
 
 def get_results(subjects):
@@ -113,17 +118,15 @@ def get_results(subjects):
     return results
 
 
-def get_timedist_average(subjects):
-    """Get grand average timedist for subjects (normal trials only).
+def get_timedist_values(subjects):
+    """Get timedist vals for subjects (normal trials only).
     Returns tuple of timedist (mean, std)"""
     if not isinstance(subjects, list):
         subjects = [subjects]
     logger.debug('starting time-distance analysis')
     ans = list()
-    for j, subject in enumerate(subjects):
-        logger.debug('processing subject %s' % subject)
+    for subject in subjects:
+        logger.info('processing subject %s' % subject)
         Nfiles = get_files(subject, 'normal')
         ans.extend([c3d.get_analysis(c3dfile) for c3dfile in Nfiles])
-    return timedist.group_analysis(ans), timedist.group_analysis(ans, fun=np.std)
-    
-    
+    return ans
