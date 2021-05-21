@@ -125,8 +125,10 @@ def get_timedist_values(subjects):
         subjects = [subjects]
     logger.debug('starting time-distance analysis')
     ans = list()
+    filenames = list()
     for subject in subjects:
         logger.info('processing subject %s' % subject)
         Nfiles = get_files(subject, 'normal')
+        filenames.extend(Nfiles)
         ans.extend([c3d.get_analysis(c3dfile) for c3dfile in Nfiles])
-    return ans
+    return ans, filenames
