@@ -1,5 +1,3 @@
-
-
 These are (semi)automatic processing / analysis scripts for the CP project.
 
 Two stages:
