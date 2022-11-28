@@ -1,4 +1,6 @@
-These are (semi)automatic processing / analysis scripts for the CP research project.
+NOTE: these scripts have not been maintained and may not work with current gaitutils API.
+
+(Semi)automatic processing / analysis scripts for the CP research project.
 
 Two stages:
     
@@ -16,9 +18,5 @@ Workflow:
 * edit cp_do_analysis, specify filenames etc.
 * run cp_do_analysis
 * take xls file and run
-
-
-
-
 
 
